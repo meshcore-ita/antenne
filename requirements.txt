@@ -1,0 +1,3 @@
+PyNEC==2.3.4
+numpy
+markdown

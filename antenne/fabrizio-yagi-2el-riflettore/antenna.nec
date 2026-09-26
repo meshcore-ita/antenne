@@ -1,0 +1,15 @@
+CM Yagi 2 elementi: alimentato 146 mm + riflettore 162 mm
+CM Trascritto dalla foto del file originale di Fabrizio
+CE
+SY len1=0.146
+SY len2=0.162
+SY dia=6/1000
+SY lr0=75
+GW 2 11 0 -len1/2 0 0 len1/2 0 dia/2
+GW 1 11 lr0/1000 -len2/2 0 lr0/1000 len2/2 0 dia/2
+GE 0
+EK
+EX 0 2 6 0 1 0
+GN -1
+FR 0 1 0 0 869.5 1
+EN

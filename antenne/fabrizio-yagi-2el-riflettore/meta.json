@@ -1,0 +1,18 @@
+{
+  "title": "Yagi 2 elementi con riflettore (pybot)",
+  "author": "Fabrizio",
+  "type": "Yagi 2 elementi, alimentato + riflettore",
+  "status": "In uso sul nodo pybot",
+  "description": "Alimentato 146 mm e riflettore 162 mm in tubo di rame da 6 mm, a 75 mm di distanza, su boom in plastica. Polarizzazione verticale.",
+  "photos": [
+    {
+      "file": "installata.jpg",
+      "alt": "L'antenna montata sul tetto con il nodo solare"
+    },
+    {
+      "file": "banco.jpg",
+      "alt": "L'antenna sul banco, con il file .nec sullo schermo"
+    }
+  ],
+  "license": "CC-BY-SA-4.0"
+}

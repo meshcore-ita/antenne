@@ -1,0 +1,8 @@
+{
+  "title": "Yagi 10 elementi (progetto DL 432 MHz scalato)",
+  "author": "Fabrizio",
+  "type": "Yagi 10 elementi",
+  "status": "Variante di studio",
+  "description": "Progetto tedesco per 432 MHz riscalato a 868 MHz con la variabile fa = 432/868. Boom di circa 58 cm, elementi in alluminio.",
+  "license": "CC-BY-SA-4.0"
+}
