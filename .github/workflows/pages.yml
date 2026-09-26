@@ -40,3 +40,21 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Dopo il deploy avvisa IndexNow delle pagine cambiate (tutte se il job è
+  # lanciato a mano). Non deve mai far fallire un deploy già riuscito.
+  indexnow:
+    if: github.event_name != 'pull_request'
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - continue-on-error: true
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python3 tools/indexnow.py --all
+          else
+            python3 tools/indexnow.py "${{ github.event.before }}" "${{ github.sha }}"
+          fi
