@@ -1,5 +1,7 @@
 """Simulate every antenne/*/antenna.nec and write a static gallery to site/."""
 import html
+import subprocess
+from datetime import date
 import json
 import math
 import re
@@ -102,9 +104,28 @@ details.help .help-body p{color:var(--muted);font-size:.9rem;margin:.6rem 0}
 """
 
 
-def page(title, body, root="..", head=""):
+PAGES = []                         # (url, lastmod) per la sitemap
+
+
+def lastmod(*paths):
+    """Data dell'ultimo commit che tocca i percorsi (serve fetch-depth 0 in CI); oggi se non disponibile."""
+    try:
+        out = subprocess.run(["git", "log", "-1", "--format=%cs", "--", *map(str, paths)],
+                             cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
+        return out or date.today().isoformat()
+    except (OSError, subprocess.CalledProcessError):
+        return date.today().isoformat()
+
+
+def page(title, body, root="..", head="", url=None, desc="", mod=None):
+    meta = ""
+    if url:
+        PAGES.append((url, mod or date.today().isoformat()))
+        meta += f"<link rel=canonical href='{url}'>"
+    if desc:
+        meta += f"<meta name=description content='{html.escape(desc, quote=True)}'>"
     return (f"<!doctype html><html lang=it><meta charset=utf-8>"
-            f"<meta name=viewport content='width=device-width,initial-scale=1'>"
+            f"<meta name=viewport content='width=device-width,initial-scale=1'>{meta}"
             f"<title>{html.escape(title)} · MeshCore ITA</title><style>{CSS.replace('ROOT', root)}</style>{head}"
             f"<body>{body}</body></html>")
 
@@ -395,7 +416,10 @@ def build_guide():
             f"<div class='guide-content prose'>{content_html}</div>"
             "</div>")
     (OUT / GUIDE).mkdir(parents=True, exist_ok=True)
-    (OUT / GUIDE / "index.html").write_text(page("Guida alle antenne", body, root=".."))
+    (OUT / GUIDE / "index.html").write_text(page(
+        "Guida alle antenne", body, root="..", url=f"{SITE}antenne/{GUIDE}/", mod=lastmod(GUIDE_MD),
+        desc="Guida per chi inizia: lunghezza d'onda, dipolo, polarizzazione, dBi e dBd, ROS, impedenza, "
+             "adattamento a 50 Ω, ERP a 869,618 MHz e schede NEC."))
 
 
 def build():
@@ -463,7 +487,8 @@ def build():
                 + nec_explained(deck, nec_text)
                 + "<h2>File del modello</h2><p><a class=btn href='antenna.nec' download>Scarica antenna.nec</a></p>"
                 "<p class=note>Si apre con xnec2c, 4nec2 o EZNEC.</p>")
-        (dst / "index.html").write_text(page(meta["title"], body, head=IMPORTMAP))
+        (dst / "index.html").write_text(page(meta["title"], body, head=IMPORTMAP, url=url,
+                                             desc=meta.get("description", ""), mod=lastmod(d)))
         rows.append((d.name, meta, r, pol))
         print(f"{d.name}: Z={fmt_z(r['z'])} ROS={r['swr']:.2f} G={r['gmax']:.1f} dBi F/B={r['fb']:.1f} dB pol={pol}")
 
@@ -483,8 +508,16 @@ def build():
             "<th style=text-align:right>Avanti/dietro dB</th><th style=text-align:right>ROS</th></tr>"
             f"{table}</table>"
             "<p class=note>Simulazioni in NEC-2: indicano la tendenza, non sostituiscono una misura con un VNA.</p>")
-    (OUT / "index.html").write_text(page("Antenne della community", body, root="."))
+    (OUT / "index.html").write_text(page(
+        "Antenne della community", body, root=".", url=f"{SITE}antenne/", mod=lastmod(SRC, GUIDE_MD),
+        desc=f"Antenne per MeshCore condivise dalla community, simulate in NEC-2 a {F0_IT} MHz: vista 3D, "
+             "ROS, impedenza, potenza massima ERP e istruzioni di costruzione."))
     (OUT / "search-index.json").write_text(json.dumps(SEARCH, ensure_ascii=False, separators=(",", ":")))
+    urls = "".join(f"  <url>\n    <loc>{u}</loc>\n    <lastmod>{m}</lastmod>\n  </url>\n"
+                   for u, m in sorted(PAGES, key=lambda p: (p[0].count("/"), p[0])))
+    (OUT / "sitemap.xml").write_text("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                     "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n"
+                                     f"{urls}</urlset>\n")
     if errors:
         print("\n".join(["ERRORI:"] + errors), file=sys.stderr)
         sys.exit(1)
