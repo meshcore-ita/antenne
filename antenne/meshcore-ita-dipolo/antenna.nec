@@ -1,0 +1,10 @@
+CM Dipolo verticale a mezz'onda, filo di rame da 2 mm
+CM Accordato a 869.618 MHz in spazio libero
+CE
+SY L=0.1606
+GW 1 21 0 0 -L/2 0 0 L/2 0.001
+GE 0
+EK
+EX 0 1 11 0 1 0
+FR 0 1 0 0 869.618 0
+EN

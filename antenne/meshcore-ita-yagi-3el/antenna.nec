@@ -1,0 +1,17 @@
+CM Yagi 3 elementi, polarizzazione verticale, tubo da 4 mm
+CM Riflettore 0.50 lambda, direttore 0.43 lambda, spaziature 0.30 e 0.25 lambda
+CE
+SY lam=0.34474
+SY LR=0.5*lam
+SY LD=0.1450
+SY LX=0.43*lam
+SY S1=0.3*lam
+SY S2=0.55*lam
+GW 1 21 0 0 -LR/2 0 0 LR/2 0.002
+GW 2 21 S1 0 -LD/2 S1 0 LD/2 0.002
+GW 3 21 S2 0 -LX/2 S2 0 LX/2 0.002
+GE 0
+EK
+EX 0 2 11 0 1 0
+FR 0 1 0 0 869.618 0
+EN

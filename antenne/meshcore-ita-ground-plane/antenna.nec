@@ -1,0 +1,15 @@
+CM Ground plane un quarto d'onda con 4 radiali inclinati di 45 gradi
+CM Stilo e radiali in filo da 2 mm, radiali lunghi 1.05 volte lo stilo
+CE
+SY L=0.0775
+SY R=1.05*L*0.7071
+GW 1 15 0 0 0 0 0 L 0.001
+GW 2 15 0 0 0 R 0 -R 0.001
+GW 3 15 0 0 0 -R 0 -R 0.001
+GW 4 15 0 0 0 0 R -R 0.001
+GW 5 15 0 0 0 0 -R -R 0.001
+GE 0
+EK
+EX 0 1 1 0 1 0
+FR 0 1 0 0 869.618 0
+EN

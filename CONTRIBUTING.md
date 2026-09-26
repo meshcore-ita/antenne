@@ -14,9 +14,14 @@
      "status": "In uso | Prototipo | Variante di studio",
      "description": "Una o due frasi su misure e materiali.",
      "photos": [{ "file": "foto.jpg", "alt": "Descrizione della foto" }],
-     "license": "CC-BY-SA-4.0"
+     "license": "CC-BY-SA-4.0",
+     "montaggio": "Verticale"
    }
    ```
+
+   `montaggio` è facoltativo: indicalo se l'antenna reale è montata ruotata
+   rispetto al file (per esempio elementi lungo y nel modello ma verticali sul
+   tetto). La galleria mostra allora la polarizzazione reale.
 
 4. Facoltativo: `README.md` con note di costruzione, foto, e una misura
    `.s1p` fatta con un VNA.

@@ -1,0 +1,9 @@
+{
+  "title": "Yagi 3 elementi (riflettore + direttore) 869 MHz",
+  "author": "MeshCore ITA",
+  "type": "Yagi 3 elementi, riflettore + alimentato + direttore",
+  "status": "Progetto di riferimento",
+  "description": "Riflettore, alimentato e direttore in tubo da 4 mm, spaziature 0,30 λ e 0,25 λ scelte per restare vicini a 50 Ω senza reti di adattamento. Un compromesso didattico tra guadagno, rapporto avanti/dietro e impedenza.",
+  "photos": [],
+  "license": "CC-BY-SA-4.0"
+}

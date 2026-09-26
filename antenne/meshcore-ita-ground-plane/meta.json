@@ -1,0 +1,9 @@
+{
+  "title": "Ground plane 1/4 d'onda con 4 radiali 869 MHz",
+  "author": "MeshCore ITA",
+  "type": "Ground plane a quarto d'onda",
+  "status": "Progetto di riferimento",
+  "description": "Stilo verticale da 77,5 mm in filo da 2 mm, con 4 radiali inclinati a 45° lunghi 1,05 volte lo stilo. Impedenza vicina a 50 Ω senza alcun adattamento aggiuntivo: la scelta più semplice per un nodo omnidirezionale.",
+  "photos": [],
+  "license": "CC-BY-SA-4.0"
+}

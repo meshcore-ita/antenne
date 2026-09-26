@@ -136,3 +136,89 @@ def pattern(d, f, step=5):
 def swr(z, z0=50.0):
     rho = abs((z - z0) / (z + z0))
     return (1 + rho) / (1 - rho) if rho < 1 else float("inf")
+
+
+
+def explain_lines(text, scale=1.0):
+    """Per-line Italian explanation of a raw .nec deck, for the annotated listing.
+
+    Mirrors the card handling in parse() but never raises: unknown or malformed
+    lines get a generic note instead of aborting. `scale` should be the final
+    Deck.scale (from parse()) so GW coordinates are shown in the mm actually
+    used by the simulation, regardless of where a GS card sits in the file.
+    Returns a list of {"raw": line, "note": str} dicts, one per source line.
+    """
+    out = []
+    sym = {}
+    for raw in text.splitlines():
+        line = raw.rstrip("\n")
+        stripped = line.strip()
+        if not stripped:
+            out.append({"raw": line, "note": ""})
+            continue
+        if stripped[0] in "'!":
+            out.append({"raw": line, "note": "Commento (ignorato dal simulatore)."})
+            continue
+        card, rest = stripped[:2].upper(), stripped[2:]
+        note = ""
+        try:
+            if card == "CM":
+                note = "Commento descrittivo del modello (ignorato dal simulatore)."
+            elif card == "CE":
+                note = "Fine dei commenti: da qui iniziano le schede di geometria."
+            elif card == "SY":
+                parts = []
+                for part in rest.split(","):
+                    if "=" in part:
+                        k, v = part.split("=", 1)
+                        k = k.strip()
+                        val = _ev(v.split("'")[0].strip(), sym, line)
+                        sym[k] = val
+                        parts.append(f"{k} = {val:g}")
+                note = ("Variabile " + ", ".join(parts) + "." if parts else "Variabile (nessun valore riconosciuto).")
+            elif card in ("GW", "GS", "GE", "EK", "GN", "EX", "LD", "FR"):
+                f = _fields(rest.split("'")[0])
+                n = lambda i, default=0.0: _ev(f[i], sym, line) if i < len(f) else default
+                if card == "GW":
+                    tag, segs = int(n(0)), int(n(1))
+                    x1, y1, z1, x2, y2, z2, r = (n(i) for i in range(2, 9))
+                    p1 = (x1 * scale * 1000, y1 * scale * 1000, z1 * scale * 1000)
+                    p2 = (x2 * scale * 1000, y2 * scale * 1000, z2 * scale * 1000)
+                    length_mm = math.dist(p1, p2)
+                    note = (f"Filo {tag}: {segs} segmenti, da ({p1[0]:.0f}, {p1[1]:.0f}, {p1[2]:.0f}) mm "
+                            f"a ({p2[0]:.0f}, {p2[1]:.0f}, {p2[2]:.0f}) mm — diametro {r * scale * 2000:.1f} mm, "
+                            f"lunghezza {length_mm:.0f} mm.")
+                elif card == "GS":
+                    note = f"Fattore di scala delle coordinate: ×{n(2, 1.0):g} (già applicato ai fili qui sopra)."
+                elif card == "GE":
+                    note = "Fine della geometria." + (
+                        " Indica un piano di massa nell'origine (immagine speculare)." if int(n(0)) == 1 else "")
+                elif card == "EK":
+                    note = "Kernel per fili spessi (extended thin-wire kernel): più preciso quando il diametro non è trascurabile."
+                elif card == "GN":
+                    t = int(n(0))
+                    if t == -1:
+                        note = "Nessun terreno: simulazione in spazio libero."
+                    elif t == 0:
+                        note = "Terreno reale (dielettrico con perdite)."
+                    elif t == 1:
+                        note = "Terreno modellato come conduttore perfetto."
+                    else:
+                        note = f"Terreno tipo {t}."
+                elif card == "EX":
+                    note = f"Alimentazione: sul filo {int(n(1))}, segmento {int(n(2))}."
+                elif card == "LD":
+                    note = f"Carico elettrico (tipo {int(n(0))}) sul filo {int(n(1))}: modella una perdita (es. conducibilità reale del metallo)."
+                elif card == "FR":
+                    note = (f"Frequenza nel file originale: {n(4):g} MHz — la galleria la ignora e simula sempre "
+                            "a 869,618 MHz (preset italiano), con una scansione 855–885 MHz.")
+            elif card in ("RP", "PT", "PL", "XQ", "NE", "NH"):
+                note = "Ignorata dalla galleria: il diagramma di irradiazione lo calcola il generatore del sito."
+            elif card == "EN":
+                note = "Fine del file."
+            else:
+                note = "Scheda non riconosciuta da questo lettore."
+        except Exception:
+            note = "Riga non interpretabile automaticamente."
+        out.append({"raw": line, "note": note})
+    return out
