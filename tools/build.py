@@ -19,6 +19,7 @@ DOCS = ROOT / "docs"
 GUIDE_MD = DOCS / "guida.md"
 GUIDE = "guida"                    # cartella della guida sotto site/
 F0 = 869.618                       # preset MeshCore ITA
+SITE = "https://meshcore-ita.github.io/"   # sito principale della community
 F0_IT = "869,618"                  # stesso valore, formato italiano (virgola) per i testi
 BAND = (869.4, 869.65)             # sub-banda 500 mW ERP
 ERP_MAX = 27.0                     # dBm, 500 mW ERP
@@ -38,6 +39,7 @@ a{color:var(--fg);text-decoration-color:var(--accent);text-underline-offset:3px}
 h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.1;letter-spacing:-.03em;font-weight:600;margin:.4rem 0 1rem}
 h2{font-size:1.4rem;letter-spacing:-.02em;font-weight:600;margin:3rem 0 1rem}
 .eyebrow{font:500 .75rem var(--mono);text-transform:uppercase;letter-spacing:.14em;color:var(--accent)}
+.eyebrow a{color:inherit;text-decoration:none}.eyebrow a:hover{text-decoration:underline}
 .lede{color:var(--muted);font-size:1.1rem;max-width:48rem}
 .back{font:.85rem var(--mono);color:var(--muted);text-decoration:none}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:2rem 0}
@@ -359,7 +361,7 @@ def render_guide():
 def build_guide():
     content_html, toc_html = render_guide()
     body = ("<a class=back href='../'>← Tutte le antenne</a>"
-            "<p class=eyebrow>Antenne MeshCore ITA</p>"
+            f"<p class=eyebrow><a href='{SITE}'>MeshCore ITA</a> · Antenne</p>"
             "<div class=guide-wrap>"
             f"<nav class=guide-toc aria-label='Indice della guida'>{toc_html}</nav>"
             f"<div class='guide-content prose'>{content_html}</div>"
@@ -413,7 +415,7 @@ def build():
         tags = "".join(f"<span class=tag>{html.escape(t)}</span>" for t in
                        (meta["type"], meta.get("status", ""), f"di {meta['author']}", gnd, pol) if t)
         body = (f"<a class=back href='../'>← Tutte le antenne</a>"
-                f"<p class=eyebrow>Antenne MeshCore ITA</p><h1>{html.escape(meta['title'])}</h1>"
+                f"<p class=eyebrow><a href='{SITE}'>MeshCore ITA</a> · Antenne</p><h1>{html.escape(meta['title'])}</h1>"
                 f"<p class=lede>{html.escape(meta.get('description', ''))}</p>"
                 f"<p class=guide-note>Nuovo alle antenne? <a href='../{GUIDE}/'>Leggi la guida</a> per capire "
                 "guadagno, ROS, impedenza e polarizzazione.</p>"
@@ -435,7 +437,8 @@ def build():
         f"<td>{html.escape(pol)}</td><td>{html.escape(m['author'])}</td>"
         f"<td class=n>{r['gmax']:.1f}</td><td class=n>{r['fb']:.1f}</td><td class=n>{r['swr']:.2f}</td></tr>"
         for n, m, r, pol in rows)
-    body = ("<p class=eyebrow>MeshCore ITA</p><h1>Antenne della community</h1>"
+    body = (f"<p class=eyebrow><a href='{SITE}'>MeshCore ITA</a> · <a href='{SITE}blog/galleria-antenne/'>com'è nata</a></p>"
+            "<h1>Antenne della community</h1>"
             f"<p class=lede>Modelli NEC-2 condivisi dalla community, simulati automaticamente a {F0_IT} MHz, "
             "il preset italiano. Ogni scheda ha la vista 3D, i grafici e il file <code>.nec</code> da scaricare.</p>"
             f"<p class=guide-note>Nuovo alle antenne? <a href='{GUIDE}/'>Leggi la guida</a> prima di scegliere "
