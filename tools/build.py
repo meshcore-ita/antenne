@@ -2,6 +2,7 @@
 import html
 import json
 import math
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -348,6 +349,32 @@ def nec_explained(deck, text):
         f"<table class=necdump><tr><th>Riga</th><th>Cosa fa</th></tr>{rows}</table>")
 
 
+SEARCH = []                        # chunk per la ricerca del sito principale
+
+
+def _plain(fragment):
+    text = re.sub(r"<[^>]+>", " ", fragment)
+    return re.sub(r"\s+", " ", html.unescape(text)).strip()
+
+
+def index_html(fragment, url, page_label, intro_title, slug):
+    """Divide un frammento HTML sugli <h2> e aggiunge un chunk per sezione a SEARCH.
+    Formato uguale a search-index.json del sito: id, page, title, url, text."""
+    parts = re.split(r"(<h2[^>]*>.*?</h2>)", fragment, flags=re.S)
+    title, anchor, buf = intro_title, "", parts[0]
+    def flush():
+        text = _plain(buf)
+        if text:
+            SEARCH.append({"id": f"antenne--{slug}--{anchor or 'intro'}", "page": page_label,
+                           "title": title, "url": url + (f"#{anchor}" if anchor else ""), "text": text[:1200]})
+    for k in range(1, len(parts), 2):
+        flush()
+        h = parts[k]
+        m = re.search(r"id=[\"']?([^\"' >]+)", h)
+        anchor, title, buf = (m.group(1) if m else ""), _plain(h), parts[k + 1]
+    flush()
+
+
 def render_guide():
     if not GUIDE_MD.exists():
         print(f"ERRORE: {GUIDE_MD} non trovato (la guida è gestita a parte).", file=sys.stderr)
@@ -355,6 +382,7 @@ def render_guide():
     md = markdown.Markdown(extensions=["tables", "attr_list", "toc", "fenced_code"],
                             extension_configs={"toc": {"toc_depth": "2-3", "anchorlink": False, "permalink": False}})
     content_html = md.convert(GUIDE_MD.read_text())
+    index_html(content_html, f"{SITE}antenne/{GUIDE}/", "Antenne · Guida", "Guida alle antenne", GUIDE)
     return content_html, md.toc
 
 
@@ -397,7 +425,14 @@ def build():
         for f in d.iterdir():
             if f.suffix.lower() in (".nec", ".jpg", ".jpeg", ".png", ".webp", ".s1p"):
                 shutil.copy(f, dst / f.name)
-        notes = markdown.markdown((d / "README.md").read_text(), extensions=["tables"]) if (d / "README.md").exists() else ""
+        notes = (markdown.markdown((d / "README.md").read_text(), extensions=["tables", "toc"])
+                 if (d / "README.md").exists() else "")
+        url = f"{SITE}antenne/{d.name}/"
+        SEARCH.append({"id": f"antenne--{d.name}--scheda", "page": "Antenne", "title": meta["title"], "url": url,
+                       "text": f"{meta.get('description', '')} {meta['type']}. Autore {meta['author']}. "
+                               f"Guadagno {r['gmax']:.1f} dBi, avanti/dietro {r['fb']:.1f} dB, ROS {r['swr']:.2f} "
+                               f"a {F0_IT} MHz, impedenza {fmt_z(r['z'])}, polarizzazione {pol.lower()}."})
+        index_html(notes, url, f"Antenne · {meta['title']}", meta["title"], d.name)
         photos = "".join(f"<figure><img class=photo loading=lazy src='{html.escape(p['file'])}' alt='{html.escape(p['alt'])}'>"
                          f"<figcaption>{html.escape(p['alt'])}</figcaption></figure>" for p in meta.get("photos", []))
         gnd = "spazio libero" if not nec.has_ground(deck) else "sopra il terreno definito nel file"
@@ -449,6 +484,7 @@ def build():
             f"{table}</table>"
             "<p class=note>Simulazioni in NEC-2: indicano la tendenza, non sostituiscono una misura con un VNA.</p>")
     (OUT / "index.html").write_text(page("Antenne della community", body, root="."))
+    (OUT / "search-index.json").write_text(json.dumps(SEARCH, ensure_ascii=False, separators=(",", ":")))
     if errors:
         print("\n".join(["ERRORI:"] + errors), file=sys.stderr)
         sys.exit(1)
