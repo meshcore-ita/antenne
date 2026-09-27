@@ -1,29 +1,45 @@
-CM test
+CM Yagi LFA (Loop Fed Array) 3 elementi per 868 MHz - modello di Fabrizio
+CM Riflettore 162 mm - loop alimentato 141 x 28 mm - direttore 147 mm
+CM Elementi lungo y e boom lungo x: nel file la polarizzazione e' orizzontale
+CM Tondino da 4 mm; boom 124 mm dal riflettore al direttore
+CM Il loop e' un rettangolo chiuso alimentato al centro del lato verso il direttore
+CM Simulato a 869.618 MHz: circa 8.8 dBi - avanti/dietro circa 15 dB - Z circa 50 ohm
+CM Spazio libero; conduttori ideali (nessun LD: perdite del metallo trascurate)
 CE
 
-sy len1=162/1000
-sy len2=141/1000
-sy len3=147/1000
-sy dia=4/1000
+' --- Lunghezze degli elementi (m) ---
+SY len1=162/1000	' riflettore
+SY len2=141/1000	' lati lunghi del loop alimentato
+SY len3=147/1000	' direttore
+SY dia=4/1000	' diametro del tondino
 
-sy lr0=75
-sy lr1=47
-sy ld0=124
+' --- Posizioni lungo il boom (mm dal riflettore) ---
+SY lr0=75	' lato alimentato del loop (verso il direttore)
+SY lr1=47	' lato posteriore del loop (verso il riflettore)
+SY ld0=124	' direttore
 
-
-GW 1 11 0       -len1/2 0 0       len1/2  0 dia/2
-GW 2 11 lr0/1000 -len2/2 0 lr0/1000  len2/2  0 dia/2
-GW 3 11 lr1/1000 -len2/2 0 lr1/1000  len2/2  0 dia/2
-GW 4 1  lr0/1000 -len2/2 0 lr1/1000 -len2/2  0 dia/2
-GW 5 1  lr0/1000  len2/2 0 lr1/1000  len2/2  0 dia/2
-GW 6 11 ld0/1000 -len3/2 0 ld0/1000  len3/2  0 dia/2
-
+' --- Geometria ---
+' Riflettore
+GW 1 21 0        -len1/2 0 0        len1/2 0 dia/2
+' Loop alimentato: lato anteriore (sorgente) e lato posteriore
+GW 2 21 lr0/1000 -len2/2 0 lr0/1000  len2/2 0 dia/2
+GW 3 21 lr1/1000 -len2/2 0 lr1/1000  len2/2 0 dia/2
+' Loop alimentato: lati corti di chiusura (28 mm)
+GW 4 4  lr0/1000 -len2/2 0 lr1/1000 -len2/2 0 dia/2
+GW 5 4  lr0/1000  len2/2 0 lr1/1000  len2/2 0 dia/2
+' Direttore
+GW 6 21 ld0/1000 -len3/2 0 ld0/1000  len3/2 0 dia/2
 GE 0
 EK
-EX 0 2 6 0 1 0
+
+' --- Alimentazione: 1 V al centro del lato anteriore del loop (filo 2 - segmento 11 di 21) ---
+EX 0 2 11 0 1 0
+' --- Spazio libero ---
 GN -1
 
-FR 0 1 0 0 869.618 1
+' --- Frequenza di progetto (preset italiano 869.618 MHz) ---
+FR 0 1 0 0 869.618 0
 
+' --- Diagramma di irradiazione (ignorato dalla galleria: utile in 4nec2) ---
+RP 0 37 73 1000 0 0 5 5
 EN
-
