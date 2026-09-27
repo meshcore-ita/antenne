@@ -1,0 +1,29 @@
+CM test
+CE
+
+sy len1=162/1000
+sy len2=141/1000
+sy len3=147/1000
+sy dia=4/1000
+
+sy lr0=75
+sy lr1=47
+sy ld0=124
+
+
+GW 1 11 0       -len1/2 0 0       len1/2  0 dia/2
+GW 2 11 lr0/1000 -len2/2 0 lr0/1000  len2/2  0 dia/2
+GW 3 11 lr1/1000 -len2/2 0 lr1/1000  len2/2  0 dia/2
+GW 4 1  lr0/1000 -len2/2 0 lr1/1000 -len2/2  0 dia/2
+GW 5 1  lr0/1000  len2/2 0 lr1/1000  len2/2  0 dia/2
+GW 6 11 ld0/1000 -len3/2 0 ld0/1000  len3/2  0 dia/2
+
+GE 0
+EK
+EX 0 2 6 0 1 0
+GN -1
+
+FR 0 1 0 0 2450 1
+
+EN
+
