@@ -1,7 +1,9 @@
 {
-  "title": "Yagi 3 elementi lfa",
+  "title": "Yagi LFA 3 elementi",
   "author": "Fabrizio",
-  "type": "Yagi 3 elementi",
-  "description": "Yagi lfa ottimizzata per 868 Mhz",
-  "license": "CC-BY-SA-4.0"
+  "type": "Yagi 3 elementi, riflettore + loop alimentato (LFA) + direttore",
+  "status": "Variante di studio",
+  "description": "Riflettore 162 mm, loop alimentato 141 × 28 mm e direttore 147 mm in tondino da 4 mm, su un boom di 124 mm. Il loop dà circa 50 Ω senza adattamento; ottimizzata per 868 MHz.",
+  "license": "CC-BY-SA-4.0",
+  "montaggio": "Verticale"
 }
