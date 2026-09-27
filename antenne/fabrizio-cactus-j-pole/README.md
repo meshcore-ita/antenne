@@ -38,7 +38,16 @@ L'alimentazione interna richiede particolare cura nel collegamento continuo dell
 
 Prima dell'installazione definitiva conviene misurare l'impedenza o il ROS alla frequenza di utilizzo, controllare la risposta con il palo e il cavo nella configurazione reale e confrontare, se possibile, la corrente RF sul palo con e senza stub. Le dimensioni fisiche dipendono dalla frequenza, dal diametro dei conduttori, dalle spaziature e dai dettagli dei collegamenti.
 
+## Brevetto e pubblicazione del prototipo
+
+La configurazione *mast mountable antenna* descritta da John S. Huggins è oggetto del brevetto statunitense [US10468743B2](https://patents.google.com/patent/US10468743B2/en), concesso nel 2019. Questo repository documenta un prototipo sperimentale e il relativo modello NEC2: la pubblicazione di descrizioni, fotografie proprie, misure e simulazioni non conferisce una licenza per lo sfruttamento dell'invenzione brevettata.
+
+I brevetti hanno efficacia territoriale. La scheda del brevetto consultata riporta gli Stati Uniti nella sezione «Country Status»; prima di produrre, distribuire o vendere antenne basate sul progetto occorre verificare i diritti effettivamente in vigore nei paesi interessati e le specifiche rivendicazioni. Per gli atti privati non commerciali e gli esperimenti relativi all'invenzione possono applicarsi eccezioni previste dalla normativa pertinente.
+
+Fotografie, disegni e testi dell'articolo originale possono avere una tutela distinta dal brevetto: per documentare il prototipo si usano contenuti propri e si cita la fonte. Un'eventuale licenza del file NEC2 riguarda quel file e non costituisce una licenza sul brevetto.
+
 ## Riferimento
 
 - John S. Huggins, [*Mast Mountable J-Pole Antenna*](https://www.hamradio.me/antennas/mast-mountable-j-pole-antenna.html). Descrizione della geometria, dello stub di disaccoppiamento, delle opzioni di alimentazione e delle simulazioni del progetto.
+- John S. Huggins, [US10468743B2 — *Mast mountable antenna*](https://patents.google.com/patent/US10468743B2/en), brevetto statunitense.
 - lex_ph2lb, [*Antenna experiment - 868MHz J-pole*](https://www.thethingsnetwork.org/forum/t/antenna-experiment-868mhz-j-pole/3620?utm_source=chatgpt.com). Analisi e modello nec 868 Mhz J-Pole
