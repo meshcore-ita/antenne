@@ -1,0 +1,15 @@
+{
+  "title": "Cactus J pole",
+  "author": "Fabrizio",
+  "type": "J pole",
+  "status": "Variante di studio",
+  "description": "Una J-pole montabile su palo di qualsiasi lunghezza",
+  "license": "CC-BY-SA-4.0",
+  "montaggio": "Verticale",
+  "photos": [
+    {
+      "file": "prototipo.png",
+      "alt": "Il primo prototipo, attualmente in uso sul nodo di casa"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+CM
+CE
+SY height=0
+SY pole=0.1
+SY _lambda=0.328
+SY spacing=0.008
+SY feedpoint=0.008
+SY wire=0.002
+
+GW 1 10 spacing 0 height+_lambda/4 spacing 0 height+feedpoint wire
+GW 2 5 spacing 0 height+feedpoint spacing 0 height wire
+GW 3 5 spacing 0 height 0 0 height wire
+GW 4 5 0 0 height 0 0 height+feedpoint wire
+GW 5 25 0 0 height+feedpoint 0 0 height+3/4*_lambda-feedpoint wire
+GW 6 5 0 0 height+feedpoint spacing 0 height+feedpoint wire 'Feedpoint
+GW 7 5 0 0 height 0 0 height-_lambda/4 wire
+GW 8 5 0 0 height-_lambda/4 -spacing 0 height-_lambda/4 wire
+GW 9 5 -spacing 0 height-_lambda/4 -spacing 0 height wire
+GW 10 5 0 0 height-_lambda/4 0 0 height-_lambda/4-pole wire
+GE 0
+GN -1
+EK
+EX 0 6 3 0 1 0 0
+FR 0 10 0 0 868 0.1
+RP 0 91 120 1001 0.000 0.000 2.000 3.000 5.000E+03
+EN
