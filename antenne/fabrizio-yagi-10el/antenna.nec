@@ -1,25 +1,82 @@
-CM *** 10 E-FR fuer 432 MHz ORGINAL ***
-CM *** Elemente in X-Achse , MAX-LOOP in Z-Achse ***
-CM *** BOOM Korrekturfaktor Elemente = +6mm (NEC=orginal-6mm)
-CM *** BOOM Korrekturfaktor Strahler = +12mm (NEC=orginal-12mm)
+CM Yagi 10 elementi per 868 MHz - progetto tedesco a 432 MHz riscalato, modello di Fabrizio
+CM Boom 583 mm circa, riflettore 174 mm, alimentato 153 mm, direttori 146-114 mm
+CM Elementi lungo l'asse x, boom lungo l'asse z, fascio verso +z: polarizzazione orizzontale nel file
+CM Alluminio, diametro 5 mm (elementi), alimentato modellato a 14 mm (raggio 7 mm); boom metallico
+CM Alimentazione: al centro dell'alimentato (filo 2)
+CM Simulato a 869.618 MHz: circa 12.5 dBi - avanti/dietro circa 22 dB - Z circa 33+j18 ohm
+CM Spazio libero; LD 5 modella la conducibilita' reale dell'alluminio
 CE
-SY frq=868.
+
+' --- Frequenza di riferimento per lo scalamento (frq=868 -> fa=432/868) ---
+SY frq=868.	' variando frq si riscalano tutte le dimensioni
 SY fa=432.0/frq
-GW 1,6, 0.175*fa,0.0,0.0,   -0.175*fa,0.0,0.0,   0.0025
-GW 2,7, 0.154*fa,0.0,0.156*fa, -0.154*fa,0.0,0.156*fa, 0.007
-GW 3,6, 0.147*fa,0.0,0.283*fa, -0.147*fa,0.0,0.283*fa, 0.0025
-GW 4,6, 0.135*fa,0.0,0.431*fa, -0.135*fa,0.0,0.431*fa, 0.0025
-GW 5,6, 0.130*fa,0.0,0.541*fa, -0.130*fa,0.0,0.541*fa, 0.0025
-GW 6,6, 0.125*fa,0.0,0.651*fa, -0.125*fa,0.0,0.651*fa, 0.0025
-GW 7,6, 0.120*fa,0.0,0.773*fa, -0.120*fa,0.0,0.773*fa, 0.0025
-GW 8,6, 0.118*fa,0.0,0.906*fa, -0.118*fa,0.0,0.906*fa, 0.0025
-GW 9,6, 0.116*fa,0.0,1.039*fa, -0.116*fa,0.0,1.039*fa, 0.0025
-GW 10,6,0.114*fa,0.0,1.171*fa, -0.114*fa,0.0,1.171*fa, 0.0025
-GE
-FR 0,1,0,0,frq
-EX 0,2,4,00,1.,0
-LD 5,0,0,0,3.72E+07
-PT -1
-'PL 3,1,0,3
-RP 0,181,2,1000,0.,0.,1.,90.
+
+' --- Correzione per boom metallico (NEC=originale-correzione) ---
+' Elementi parassiti: correzione +6 mm (NEC = originale - 6 mm)
+' Alimentato: correzione +12 mm (NEC = originale - 12 mm)
+
+' --- Diametri (non scalati per fa: restano quelli del progetto a 432 MHz) ---
+SY dia=5/1000	' diametro elementi parassiti e riflettore
+SY diaf=14/1000	' diametro dell'alimentato (raggio 7 mm)
+
+' --- Semilunghezze e posizioni lungo il boom (m, scalate per fa) ---
+SY l1=0.175*fa	' semilunghezza riflettore
+SY l2=0.154*fa	' semilunghezza alimentato
+SY l3=0.147*fa	' semilunghezza direttore 1
+SY l4=0.135*fa	' semilunghezza direttore 2
+SY l5=0.130*fa	' semilunghezza direttore 3
+SY l6=0.125*fa	' semilunghezza direttore 4
+SY l7=0.120*fa	' semilunghezza direttore 5
+SY l8=0.118*fa	' semilunghezza direttore 6
+SY l9=0.116*fa	' semilunghezza direttore 7
+SY l10=0.114*fa	' semilunghezza direttore 8
+
+SY z2=0.156*fa	' posizione alimentato
+SY z3=0.283*fa	' posizione direttore 1
+SY z4=0.431*fa	' posizione direttore 2
+SY z5=0.541*fa	' posizione direttore 3
+SY z6=0.651*fa	' posizione direttore 4
+SY z7=0.773*fa	' posizione direttore 5
+SY z8=0.906*fa	' posizione direttore 6
+SY z9=1.039*fa	' posizione direttore 7
+SY z10=1.171*fa	' posizione direttore 8
+
+' --- Geometria ---
+' Riflettore
+GW 1 11 l1  0.0 0.0    -l1  0.0 0.0    dia/2
+' Alimentato
+GW 2 11 l2  0.0 z2     -l2  0.0 z2     diaf/2
+' Direttore 1
+GW 3 11 l3  0.0 z3     -l3  0.0 z3     dia/2
+' Direttore 2
+GW 4 11 l4  0.0 z4     -l4  0.0 z4     dia/2
+' Direttore 3
+GW 5 11 l5  0.0 z5     -l5  0.0 z5     dia/2
+' Direttore 4
+GW 6 11 l6  0.0 z6     -l6  0.0 z6     dia/2
+' Direttore 5
+GW 7 11 l7  0.0 z7     -l7  0.0 z7     dia/2
+' Direttore 6
+GW 8 11 l8  0.0 z8     -l8  0.0 z8     dia/2
+' Direttore 7
+GW 9 11 l9  0.0 z9     -l9  0.0 z9     dia/2
+' Direttore 8
+GW 10 11 l10  0.0 z10  -l10  0.0 z10   dia/2
+GE 0
+
+' --- Conducibilita' reale dell'alluminio (3.72e7 S/m) ---
+LD 5 0 0 0 3.72E+07
+
+' --- Spazio libero ---
+GN -1
+EK
+
+' --- Alimentazione: 1 V al centro dell'alimentato (filo 2 - segmento 6 di 11) ---
+EX 0 2 6 0 1 0
+
+' --- Frequenza di progetto (preset italiano 869.618 MHz) ---
+FR 0 1 0 0 869.618 0
+
+' --- Diagramma di irradiazione (ignorato dalla galleria: utile in 4nec2) ---
+RP 0 37 73 1000 0 0 5 5
 EN

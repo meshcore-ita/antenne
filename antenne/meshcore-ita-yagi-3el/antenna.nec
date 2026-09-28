@@ -1,17 +1,43 @@
-CM Yagi 3 elementi, polarizzazione verticale, tubo da 4 mm
-CM Riflettore 0.50 lambda, direttore 0.43 lambda, spaziature 0.30 e 0.25 lambda
+CM Yagi 3 elementi per 868 MHz - progetto di riferimento MeshCore ITA
+CM Riflettore 0.50 lambda, alimentato 145 mm, direttore 0.43 lambda
+CM Spaziature: riflettore-alimentato 0.30 lambda, alimentato-direttore 0.25 lambda
+CM Elementi verticali lungo z (polarizzazione verticale), boom lungo x, fascio verso +x
+CM Tubo da 4 mm
+CM Alimentazione: al centro dell'elemento alimentato (filo 2 - segmento 11 di 21)
+CM Simulato a 869.618 MHz: circa 8.1 dBi - avanti/dietro circa 6 dB - Z circa 41 ohm
+CM Spazio libero; conduttori ideali (nessun LD: perdite del metallo trascurate)
 CE
-SY lam=0.34474
-SY LR=0.5*lam
-SY LD=0.1450
-SY LX=0.43*lam
-SY S1=0.3*lam
-SY S2=0.55*lam
-GW 1 21 0 0 -LR/2 0 0 LR/2 0.002
-GW 2 21 S1 0 -LD/2 S1 0 LD/2 0.002
-GW 3 21 S2 0 -LX/2 S2 0 LX/2 0.002
+
+' --- Lunghezze degli elementi (m) ---
+SY lam=299.792458/869.618	' lunghezza d'onda alla frequenza di progetto
+SY Lrif=0.5*lam	' riflettore
+SY Lali=145/1000	' elemento alimentato
+SY Ldir=0.43*lam	' direttore
+SY dia=4/1000	' diametro del tubo
+
+' --- Posizioni lungo il boom (m, dal riflettore) ---
+SY Pali=0.3*lam	' elemento alimentato
+SY Pdir=0.55*lam	' direttore (0.25 lambda dopo l'alimentato)
+
+' --- Geometria ---
+' Riflettore
+GW 1 21 0    0 -Lrif/2 0    0 Lrif/2 dia/2
+' Alimentato
+GW 2 21 Pali 0 -Lali/2 Pali 0 Lali/2 dia/2
+' Direttore
+GW 3 21 Pdir 0 -Ldir/2 Pdir 0 Ldir/2 dia/2
 GE 0
+
+' --- Spazio libero ---
+GN -1
 EK
+
+' --- Alimentazione: 1 V al centro dell'alimentato (filo 2 - segmento 11 di 21) ---
 EX 0 2 11 0 1 0
+
+' --- Frequenza di progetto (preset italiano 869.618 MHz) ---
 FR 0 1 0 0 869.618 0
+
+' --- Diagramma di irradiazione (ignorato dalla galleria: utile in 4nec2) ---
+RP 0 37 73 1000 0 0 5 5
 EN

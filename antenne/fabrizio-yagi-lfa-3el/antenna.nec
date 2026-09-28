@@ -13,29 +13,30 @@ SY len2=141/1000	' lati lunghi del loop alimentato
 SY len3=147/1000	' direttore
 SY dia=4/1000	' diametro del tondino
 
-' --- Posizioni lungo il boom (mm dal riflettore) ---
-SY lr0=75	' lato alimentato del loop (verso il direttore)
-SY lr1=47	' lato posteriore del loop (verso il riflettore)
-SY ld0=124	' direttore
+' --- Posizioni lungo il boom (m, dal riflettore) ---
+SY lr0=75/1000	' lato alimentato del loop (verso il direttore)
+SY lr1=47/1000	' lato posteriore del loop (verso il riflettore)
+SY ld0=124/1000	' direttore
 
 ' --- Geometria ---
 ' Riflettore
-GW 1 21 0        -len1/2 0 0        len1/2 0 dia/2
+GW 1 21 0    -len1/2 0 0    len1/2 0 dia/2
 ' Loop alimentato: lato anteriore (sorgente) e lato posteriore
-GW 2 21 lr0/1000 -len2/2 0 lr0/1000  len2/2 0 dia/2
-GW 3 21 lr1/1000 -len2/2 0 lr1/1000  len2/2 0 dia/2
+GW 2 21 lr0 -len2/2 0 lr0  len2/2 0 dia/2
+GW 3 21 lr1 -len2/2 0 lr1  len2/2 0 dia/2
 ' Loop alimentato: lati corti di chiusura (28 mm)
-GW 4 4  lr0/1000 -len2/2 0 lr1/1000 -len2/2 0 dia/2
-GW 5 4  lr0/1000  len2/2 0 lr1/1000  len2/2 0 dia/2
+GW 4 4  lr0 -len2/2 0 lr1 -len2/2 0 dia/2
+GW 5 4  lr0  len2/2 0 lr1  len2/2 0 dia/2
 ' Direttore
-GW 6 21 ld0/1000 -len3/2 0 ld0/1000  len3/2 0 dia/2
+GW 6 21 ld0 -len3/2 0 ld0  len3/2 0 dia/2
 GE 0
+
+' --- Spazio libero ---
+GN -1
 EK
 
 ' --- Alimentazione: 1 V al centro del lato anteriore del loop (filo 2 - segmento 11 di 21) ---
 EX 0 2 11 0 1 0
-' --- Spazio libero ---
-GN -1
 
 ' --- Frequenza di progetto (preset italiano 869.618 MHz) ---
 FR 0 1 0 0 869.618 0

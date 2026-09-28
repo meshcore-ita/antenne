@@ -1,15 +1,37 @@
-CM Yagi 2 elementi: alimentato 146 mm + riflettore 162 mm
-CM Trascritto dalla foto del file originale di Fabrizio
+CM Yagi 2 elementi per 868 MHz - modello di Fabrizio
+CM Alimentato 146 mm + riflettore 162 mm
+CM Elementi lungo y e boom lungo x: nel file la polarizzazione e' orizzontale; l'antenna reale e' montata verticale sul nodo pybot
+CM Tubo di rame da 6 mm; spaziatura 75 mm su boom in plastica
+CM Trascritto da una foto del file originale di Fabrizio
+CM Simulato a 869.618 MHz: circa 6.4 dBi - avanti/dietro circa 8 dB - Z circa 54 ohm
+CM Spazio libero; conduttori ideali (nessun LD: perdite del metallo trascurate)
 CE
-SY len1=0.146
-SY len2=0.162
-SY dia=6/1000
-SY lr0=75
-GW 2 11 0 -len1/2 0 0 len1/2 0 dia/2
-GW 1 11 lr0/1000 -len2/2 0 lr0/1000 len2/2 0 dia/2
+
+' --- Lunghezze degli elementi (m) ---
+SY len1=146/1000	' alimentato
+SY len2=162/1000	' riflettore
+SY dia=6/1000	' diametro del tubo
+
+' --- Posizioni lungo il boom (m, dall'alimentato) ---
+SY lr0=75/1000	' riflettore
+
+' --- Geometria ---
+' Riflettore
+GW 1 11 lr0 -len2/2 0 lr0 len2/2 0 dia/2
+' Alimentato
+GW 2 11 0   -len1/2 0 0   len1/2 0 dia/2
 GE 0
-EK
-EX 0 2 6 0 1 0
+
+' --- Spazio libero ---
 GN -1
-FR 0 1 0 0 869.5 1
+EK
+
+' --- Alimentazione: 1 V al centro dell'alimentato (filo 2 - segmento 6 di 11) ---
+EX 0 2 6 0 1 0
+
+' --- Frequenza di progetto (preset italiano 869.618 MHz) ---
+FR 0 1 0 0 869.618 0
+
+' --- Diagramma di irradiazione (ignorato dalla galleria: utile in 4nec2) ---
+RP 0 37 73 1000 0 0 5 5
 EN

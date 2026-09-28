@@ -1,15 +1,41 @@
-CM Ground plane un quarto d'onda con 4 radiali inclinati di 45 gradi
-CM Stilo e radiali in filo da 2 mm, radiali lunghi 1.05 volte lo stilo
+CM Ground plane un quarto d'onda con 4 radiali inclinati di 45 gradi - progetto di riferimento MeshCore ITA
+CM Stilo 77.5 mm, radiali lunghi 1.05 volte lo stilo
+CM Stilo verticale lungo z; 4 radiali a 90 gradi fra loro, inclinati di 45 gradi verso il basso
+CM Stilo e radiali in filo da 2 mm
+CM Alimentazione: alla base dello stilo, alla giunzione con i radiali (filo 1 - segmento 1 di 15)
+CM Simulato a 869.618 MHz: circa 2.2 dBi - Z circa 50 ohm
+CM Spazio libero; conduttori ideali (nessun LD: perdite del metallo trascurate)
 CE
-SY L=0.0775
-SY R=1.05*L*0.7071
-GW 1 15 0 0 0 0 0 L 0.001
-GW 2 15 0 0 0 R 0 -R 0.001
-GW 3 15 0 0 0 -R 0 -R 0.001
-GW 4 15 0 0 0 0 R -R 0.001
-GW 5 15 0 0 0 0 -R -R 0.001
+
+' --- Lunghezze (m) ---
+SY L=77.5/1000	' lunghezza dello stilo
+SY Lrad=1.05*L	' lunghezza dei radiali: 1.05 volte lo stilo
+SY R=Lrad*0.7071	' proiezione orizzontale/verticale di un radiale a 45 gradi
+SY dia=2/1000	' diametro del filo
+
+' --- Geometria ---
+' Stilo, verticale lungo z
+GW 1 15 0 0 0    0 0 L    dia/2
+' Radiale +x, inclinato a 45 gradi verso il basso
+GW 2 15 0 0 0    R 0 -R    dia/2
+' Radiale -x, inclinato a 45 gradi verso il basso
+GW 3 15 0 0 0    -R 0 -R    dia/2
+' Radiale +y, inclinato a 45 gradi verso il basso
+GW 4 15 0 0 0    0 R -R    dia/2
+' Radiale -y, inclinato a 45 gradi verso il basso
+GW 5 15 0 0 0    0 -R -R    dia/2
 GE 0
+
+' --- Spazio libero ---
+GN -1
 EK
+
+' --- Alimentazione: 1 V alla base dello stilo, dove si uniscono i radiali (filo 1 - segmento 1 di 15) ---
 EX 0 1 1 0 1 0
+
+' --- Frequenza di progetto (preset italiano 869.618 MHz) ---
 FR 0 1 0 0 869.618 0
+
+' --- Diagramma di irradiazione (ignorato dalla galleria: utile in 4nec2) ---
+RP 0 37 73 1000 0 0 5 5
 EN

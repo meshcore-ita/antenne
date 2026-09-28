@@ -1,22 +1,36 @@
-CM test
-CE 
-sy len1=0.14
-sy len2=0.165
-sy dia=3/1000
+CM Yagi 2 elementi per 868 MHz - modello di Fabrizio
+CM Direttore 140 mm + alimentato 165 mm
+CM Elementi lungo y e boom lungo x: nel file la polarizzazione e' orizzontale; l'antenna reale e' montata verticale
+CM Tubo da 3 mm; spaziatura 44 mm
+CM Simulato a 869.618 MHz: circa 5.3 dBi - avanti/dietro circa 8 dB - Z circa 50 ohm
+CM Spazio libero; conduttori ideali (nessun LD: perdite del metallo trascurate)
+CE
 
-sy lr0=44
+' --- Lunghezze degli elementi (m) ---
+SY len1=140/1000	' direttore
+SY len2=165/1000	' alimentato
+SY dia=3/1000	' diametro del tubo
 
+' --- Posizioni lungo il boom (m, dal direttore) ---
+SY lr0=44/1000	' elemento alimentato
 
-GW 1 11 0       -len1/2 0 0       len1/2  0 dia/2
-
-GW 2 11 lr0/1000 -len2/2 0 lr0/1000  len2/2  0 dia/2
-
+' --- Geometria ---
+' Direttore
+GW 1 11 0   -len1/2 0 0   len1/2 0 dia/2
+' Alimentato
+GW 2 11 lr0 -len2/2 0 lr0 len2/2 0 dia/2
 GE 0
-EK
-EX 0 2 6 0 1 0
+
+' --- Spazio libero ---
 GN -1
+EK
 
-FR 0 1 0 0 869.5 1
+' --- Alimentazione: 1 V al centro dell'alimentato (filo 2 - segmento 6 di 11) ---
+EX 0 2 6 0 1 0
 
+' --- Frequenza di progetto (preset italiano 869.618 MHz) ---
+FR 0 1 0 0 869.618 0
+
+' --- Diagramma di irradiazione (ignorato dalla galleria: utile in 4nec2) ---
+RP 0 37 73 1000 0 0 5 5
 EN
-

@@ -1,10 +1,31 @@
-CM Dipolo verticale a mezz'onda, filo di rame da 2 mm
-CM Accordato a 869.618 MHz in spazio libero
+CM Dipolo verticale a mezz'onda - progetto di riferimento MeshCore ITA
+CM Lunghezza totale 160.6 mm (due bracci da 80.3 mm)
+CM Verticale lungo z, polarizzazione verticale
+CM Filo di rame, diametro 2 mm
+CM Alimentazione: al centro (filo 1 - segmento 11 di 21)
+CM Simulato a 869.618 MHz: circa 2.1 dBi - Z circa 72 ohm
+CM Spazio libero; conduttori ideali (nessun LD: perdite del metallo trascurate)
 CE
-SY L=0.1606
-GW 1 21 0 0 -L/2 0 0 L/2 0.001
+
+' --- Lunghezze (m) ---
+SY L=160.6/1000	' lunghezza totale
+SY dia=2/1000	' diametro del filo
+
+' --- Geometria ---
+' Dipolo, verticale lungo z
+GW 1 21 0 0 -L/2    0 0 L/2    dia/2
 GE 0
+
+' --- Spazio libero ---
+GN -1
 EK
+
+' --- Alimentazione: 1 V al centro (filo 1 - segmento 11 di 21) ---
 EX 0 1 11 0 1 0
+
+' --- Frequenza di progetto (preset italiano 869.618 MHz) ---
 FR 0 1 0 0 869.618 0
+
+' --- Diagramma di irradiazione (ignorato dalla galleria: utile in 4nec2) ---
+RP 0 37 73 1000 0 0 5 5
 EN

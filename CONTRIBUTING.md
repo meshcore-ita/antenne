@@ -4,6 +4,22 @@
 2. Metti il modello in `antenna.nec`. Misure in metri; puoi usare variabili
    `SY` come in 4nec2. Schede supportate: `CM CE SY GW GS GE EK GN EX LD FR`
    (`RP`, `PT`, `EN` vengono ignorate: il diagramma lo calcola la galleria).
+
+   La galleria mostra il file riga per riga, quindi i commenti contano. Per
+   restare coerente con gli altri modelli:
+   - in testa, righe `CM` che dicono cos'è l'antenna, le misure principali,
+     su quale asse stanno elementi e boom, materiale e diametro, dove è
+     alimentata e i valori simulati a 869.618 MHz; poi `CE` da solo;
+   - un `SY` per riga, in metri scritti come `mm/1000`, con un commento
+     `'` dopo un TAB; il diametro in `dia` e nel `GW` il raggio `dia/2`;
+   - commenti `'` su una riga propria sopra ogni `GW`, `EX`, `FR`;
+   - ordine `GE 0`, `LD`, `GN -1`, `EK`, `EX`, `FR`, `RP`, `EN`; campi
+     separati da spazi; fili numerati 1..N; `EX` sul segmento centrale;
+   - nei `.nec` solo caratteri ASCII (`e'`, `ohm`, `gradi`): 4nec2 non
+     legge bene gli accenti.
+
+   Un esempio completo è `antenne/fabrizio-yagi-lfa-3el/antenna.nec`.
+
 3. Aggiungi `meta.json`:
 
    ```json

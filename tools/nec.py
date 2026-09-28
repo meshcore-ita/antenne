@@ -56,10 +56,10 @@ def parse(text):
                 d.comments.append(rest.strip())
             continue
         if card == "SY":
-            for part in rest.split(","):
+            for part in rest.split("'")[0].split(","):
                 if "=" in part:
                     k, v = part.split("=", 1)
-                    sym[k.strip()] = _ev(v.split("'")[0].strip(), sym, line)
+                    sym[k.strip()] = _ev(v.strip(), sym, line)
             continue
         f = _fields(rest.split("'")[0])
         n = lambda i, default=0.0: _ev(f[i], sym, line) if i < len(f) else default
@@ -168,11 +168,11 @@ def explain_lines(text, scale=1.0):
                 note = "Fine dei commenti: da qui iniziano le schede di geometria."
             elif card == "SY":
                 parts = []
-                for part in rest.split(","):
+                for part in rest.split("'")[0].split(","):
                     if "=" in part:
                         k, v = part.split("=", 1)
                         k = k.strip()
-                        val = _ev(v.split("'")[0].strip(), sym, line)
+                        val = _ev(v.strip(), sym, line)
                         sym[k] = val
                         parts.append(f"{k} = {val:g}")
                 note = ("Variabile " + ", ".join(parts) + "." if parts else "Variabile (nessun valore riconosciuto).")
