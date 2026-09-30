@@ -29,8 +29,8 @@ GW 6 5 0 0 height+feedpoint spacing 0 height+feedpoint wire
 GW 7 5 0 0 height 0 0 height-_lambda/4 wire
 GW 8 5 0 0 height-_lambda/4 -spacing 0 height-_lambda/4 wire
 GW 9 5 -spacing 0 height-_lambda/4 -spacing 0 height wire
-' Palo (filo 10)
-GW 10 5 0 0 height-_lambda/4 0 0 height-_lambda/4-pole wire
+' Palo (filo 10): segmenti proporzionali alla lunghezza (circa uno ogni 1,6 cm), cosi' si puo' allungare pole
+GW 10 5+pole/0.016 0 0 height-_lambda/4 0 0 height-_lambda/4-pole wire
 GE 0
 
 ' --- Spazio libero ---

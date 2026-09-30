@@ -18,10 +18,10 @@ Nel modello NEC2 fornito, la variabile `pole` rappresenta la **lunghezza del pal
 
 ```nec
 SY pole=0.1
-GW 10 5 0 0 height-_lambda/4 0 0 height-_lambda/4-pole wire
+GW 10 5+pole/0.016 0 0 height-_lambda/4 0 0 height-_lambda/4-pole wire
 ```
 
-Variando `pole` e ripetendo la simulazione, **l'antenna si comporta sostanzialmente allo stesso modo nel modello**: la lunghezza del palo non determina più la risposta della parte radiante come può accadere con una J-pole classica montata direttamente su un supporto conduttivo. È questo l'effetto che si vuole ottenere con il *mast decoupling stub*.
+Variando `pole` e ripetendo la simulazione, **l'antenna si comporta sostanzialmente allo stesso modo nel modello**: la lunghezza del palo non determina più la risposta della parte radiante come può accadere con una J-pole classica montata direttamente su un supporto conduttivo. È questo l'effetto che si vuole ottenere con il *mast decoupling stub*. Il numero di segmenti del palo (`5+pole/0.016`) cresce con la sua lunghezza, così i segmenti restano corti anche con pali di alcuni metri.
 
 Il file usa `GN -1`, quindi simula la struttura **in spazio libero**. Il risultato riguarda quella geometria, quella frequenza e il punto di alimentazione rappresentati nel modello; per verificare una costruzione reale occorre misurare anche l'effetto del cavo e del montaggio.
 
@@ -50,4 +50,4 @@ Fotografie, disegni e testi dell'articolo originale possono avere una tutela dis
 
 - John S. Huggins, [*Mast Mountable J-Pole Antenna*](https://www.hamradio.me/antennas/mast-mountable-j-pole-antenna.html). Descrizione della geometria, dello stub di disaccoppiamento, delle opzioni di alimentazione e delle simulazioni del progetto.
 - John S. Huggins, [US10468743B2 — *Mast mountable antenna*](https://patents.google.com/patent/US10468743B2/en), brevetto statunitense.
-- lex_ph2lb, [*Antenna experiment - 868MHz J-pole*](https://www.thethingsnetwork.org/forum/t/antenna-experiment-868mhz-j-pole/3620?utm_source=chatgpt.com). Analisi e modello nec 868 Mhz J-Pole
+- lex_ph2lb, [*Antenna experiment - 868MHz J-pole*](https://www.thethingsnetwork.org/forum/t/antenna-experiment-868mhz-j-pole/3620). Analisi e modello nec 868 Mhz J-Pole
