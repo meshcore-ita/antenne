@@ -3,7 +3,8 @@
   "author": "Paolo",
   "type": "Yagi",
   "status": "Progetto di riferimento",
-  "description": "Modello derivato dal calcolatore di DL6WU",
+  "description": "Yagi a 10 elementi derivata dal calcolatore di DL6WU: riflettore 167 mm, dipolo ripiegato 146 × 20 mm e 8 direttori da 146 a 134 mm su un boom di 740 mm. Il modello è orizzontale per comodità, ma va montato in verticale.",
   "photos": [],
-  "license": "CC-BY-SA-4.0"
+  "license": "CC-BY-SA-4.0",
+  "montaggio": "Verticale"
 }

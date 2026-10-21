@@ -1,12 +1,13 @@
 """Simulate every antenne/*/antenna.nec and write a static gallery to site/."""
+import cmath
 import html
-import subprocess
-from datetime import date
 import json
 import math
 import re
 import shutil
+import subprocess
 import sys
+from datetime import date
 from pathlib import Path
 
 import markdown
@@ -28,6 +29,9 @@ BAND = (869.4, 869.65)             # sub-banda 500 mW ERP
 ERP_MAX = 27.0                     # dBm, 500 mW ERP
 TX_CAP = 30.0                      # dBm, limite tipico di un modulo LoRa
 SWEEP = np.arange(855.0, 885.01, 1.0)
+SWEEP_IT = f"{SWEEP[0]:g}–{SWEEP[-1]:g}"
+MOUNTS = ("Verticale", "Orizzontale")
+PHOTO_EXT = (".jpg", ".jpeg", ".png", ".webp")
 
 CSS = """
 @font-face{font-family:Geist;src:url(ROOT/fonts/geist-300-700-latin.woff2) format('woff2');font-weight:300 700;font-display:swap}
@@ -72,14 +76,31 @@ dialog.lightbox::backdrop{background:rgba(0,0,0,.92)}
 .lightbox button{position:absolute;font:1.6rem var(--mono);line-height:1;color:var(--muted);background:rgba(0,0,0,.55);border:1px solid var(--line-strong);border-radius:999px;width:2.8rem;height:2.8rem;cursor:pointer}
 .lightbox button:hover{color:#fff}.lightbox .lb-close{top:1rem;right:1rem}
 .lightbox .lb-prev{left:.8rem;top:50%}.lightbox .lb-next{right:.8rem;top:50%}
+.v3d{margin:1.5rem 0 0}
+.v3d:fullscreen{display:flex;flex-direction:column;gap:.6rem;padding:.8rem;background:var(--bg);overflow:auto}
+.v3d:fullscreen .viewer{flex:1;height:auto;min-height:0;border-radius:10px}
+.vtools{display:flex;flex-wrap:wrap;gap:.45rem .9rem;margin:0 0 .6rem}
+.vgrp{display:flex;flex-wrap:wrap;gap:.3rem}
+.vtools button{font:.74rem/1.3 var(--mono);color:var(--muted);padding:.34rem .7rem;border:1px solid var(--line-strong);background:rgba(255,255,255,.04);border-radius:999px;cursor:pointer}
+.vtools button:hover{color:var(--fg);border-color:var(--muted)}
+.vtools button[aria-pressed=true]{color:#000;background:var(--accent);border-color:var(--accent)}
+.vtools button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.vtools button:disabled{opacity:.4;cursor:default}
 .viewer{position:relative;height:min(70vh,36rem);border:1px solid var(--line);border-radius:14px;overflow:hidden;
 background:radial-gradient(ellipse at 50% 40%,#0d1f14 0%,#050806 55%,#000 100%);touch-action:none;cursor:grab}
 .viewer canvas{width:100%;height:100%;display:block}
-.viewer .modes{position:absolute;top:.8rem;left:.8rem;display:flex;gap:.4rem;margin:0}
-.modes button{font:.75rem var(--mono);color:var(--muted);padding:.35rem .7rem;border:1px solid var(--line-strong);background:rgba(0,0,0,.55);border-radius:999px;cursor:pointer;backdrop-filter:blur(6px)}
-.modes button[aria-pressed=true]{color:#000;background:var(--accent);border-color:var(--accent)}
-.legend{position:absolute;right:.9rem;bottom:.9rem;font:.7rem var(--mono);color:var(--muted);display:flex;align-items:center;gap:.5rem}
-.legend i{display:block;width:9rem;height:.45rem;border-radius:99px;background:linear-gradient(90deg,#1e3a8a,#22c55e 45%,#facc15 75%,#e11d48)}
+.vlabels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.vlab{position:absolute;left:0;top:0;font:.68rem/1 var(--mono);color:#e5e7eb;white-space:nowrap;text-shadow:0 0 4px #000,0 0 2px #000;will-change:transform}
+.vlab.dim{color:var(--dim)}.vlab.lobe{color:#fff;background:rgba(0,0,0,.6);border:1px solid var(--line-strong);padding:.2rem .45rem;border-radius:6px}
+.vtip{position:absolute;left:0;top:0;z-index:3;pointer-events:none;font:.72rem/1.5 var(--mono);color:var(--muted);background:rgba(10,12,11,.92);border:1px solid var(--line-strong);border-radius:8px;padding:.45rem .65rem;max-width:15rem;box-shadow:0 4px 18px rgba(0,0,0,.5)}
+.vtip b{display:block;color:var(--fg);font-weight:500}.vtip i{display:inline-block;width:.6rem;height:.6rem;border-radius:50%;margin-right:.4rem;vertical-align:-.05rem}
+.vtip small{display:block;color:var(--dim);font-size:.66rem}
+.vleg{position:absolute;right:.8rem;bottom:.8rem;display:flex;flex-direction:column;gap:.4rem;align-items:flex-end;font:.66rem var(--mono);color:var(--muted);pointer-events:none}
+.vleg div{display:flex;align-items:center;gap:.45rem}.vleg b{font-weight:500;color:var(--dim)}
+.vleg i{display:block;width:7rem;height:.4rem;border-radius:99px}
+.vfail{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:1.5rem;color:var(--muted);margin:0}
+.viewer[hidden],.vtip[hidden],.vfail[hidden],.vleg[hidden],.vleg div[hidden]{display:none}
+@media (max-width:600px){.vleg i{width:5rem}.vlab{font-size:.62rem}.vtools{gap:.35rem .6rem}.vtools button{font-size:.7rem;padding:.3rem .55rem}}
 .note{font-size:.85rem;color:var(--dim)}code{font-family:var(--mono);background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:0 .3rem}
 .prose{max-width:48rem;color:var(--muted)}.prose strong{color:var(--fg)}
 .btn{display:inline-block;font:500 .85rem var(--mono);color:#000;background:var(--accent);padding:.55rem 1rem;border-radius:999px;text-decoration:none}
@@ -104,8 +125,39 @@ background:radial-gradient(ellipse at 50% 40%,#0d1f14 0%,#050806 55%,#000 100%);
 .insight table.erp{margin:.8rem 0 .3rem;font-size:.85rem}
 .insight table.erp th,.insight table.erp td{padding:.35rem .5rem}
 .insight .note{margin-top:.5rem}
-table.necdump td:first-child{font-family:var(--mono);font-size:.8rem;white-space:pre;color:var(--fg)}
-table.necdump td:last-child{color:var(--muted);font-size:.88rem}
+.btn.alt{background:transparent;color:var(--fg);border:1px solid var(--line-strong)}
+.btn.alt:hover{color:var(--accent);border-color:var(--accent);filter:none}
+button.btn{cursor:pointer;border:0}button.btn.alt{border:1px solid var(--line-strong)}
+.files{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem}.copy-msg{font:.8rem var(--mono);color:var(--accent)}
+.nec-key{display:flex;flex-wrap:wrap;gap:.3rem 1rem;font:.72rem var(--mono);color:var(--dim);margin:.8rem 0}
+.k{font-family:var(--mono);font-weight:600}
+.k-com{color:var(--dim);font-weight:400}.k-sy{color:#38bdf8}.k-geo{color:var(--accent)}.k-src{color:#fb923c}.k-ctl{color:#c084fc}.k-ign{color:#7d7d7d;text-decoration:line-through;text-decoration-color:rgba(255,255,255,.3)}
+.t-c{color:var(--dim);font-style:italic}.t-n{color:#facc15}.t-def{color:#38bdf8;font-weight:600}.t-var{color:#a5d8ff}.t-fn{color:#c4b5fd}.t-op{color:var(--dim)}
+.nec{border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden;font:.8rem/1.6 var(--mono);padding:.4rem 0}
+.nl{display:grid;grid-template-columns:3.6rem minmax(0,1.3fr) minmax(0,1fr);gap:0 1rem;align-items:baseline;padding:.1rem 1rem .1rem 0;border-left:3px solid transparent;scroll-margin-top:30vh}
+.nl:hover{background:rgba(255,255,255,.035)}
+.nl.c-geo,.nl.c-src{border-left-color:rgba(255,255,255,.12)}
+.nl.c-geo[data-tag]:hover,.nl.c-src[data-tag]:hover{cursor:pointer}
+.nl.c-blank{line-height:.7rem}
+.nl .ln{text-align:right;padding-right:.3rem;color:var(--dim);text-decoration:none;user-select:none}
+.nl .ln:hover{color:var(--accent)}
+.nl .src{background:none;border:0;padding:0;font:inherit;color:var(--fg);white-space:pre-wrap;overflow-wrap:anywhere;tab-size:4}
+.nl .why{font:.82rem/1.45 var(--sans);color:var(--muted)}
+.nl.c-com .why{font-size:.74rem;color:var(--dim)}
+.nl .to3d{font:.7rem var(--mono);margin-left:.3rem;color:var(--accent);text-decoration:none;white-space:nowrap;opacity:0}
+.nl:hover .to3d,.nl:focus-within .to3d,.nl:focus .to3d{opacity:1}
+.nl:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.nl.hl{background:rgba(103,232,249,.10);border-left-color:#67e8f9}
+.nl.sel{background:rgba(34,197,94,.13);border-left-color:var(--accent)}
+.nl.flash{animation:nlflash 1.8s ease-out}
+@keyframes nlflash{0%,30%{background:rgba(34,197,94,.45)}100%{background:rgba(34,197,94,.13)}}
+.nec details.run>summary{cursor:pointer;list-style:none;padding:.45rem 1rem .45rem 4.6rem;font:.78rem var(--mono);color:var(--accent);background:rgba(34,197,94,.06);border-block:1px dashed var(--line-strong)}
+.nec details.run>summary::-webkit-details-marker{display:none}
+.nec details.run>summary::before{content:"▸ "}.nec details.run[open]>summary::before{content:"▾ "}
+.nec details.run>summary:hover{background:rgba(34,197,94,.12)}
+@media (max-width:820px){.nl{grid-template-columns:2.6rem minmax(0,1fr)}.nl .why{grid-column:2;padding-bottom:.4rem}
+.nec details.run>summary{padding-left:3.2rem}.nl .to3d{opacity:1}}
+@media (prefers-reduced-motion:reduce){.nl.flash{animation:none}}
 details.help{margin:.8rem 0 0;border:1px solid var(--line);border-radius:10px;padding:.2rem .9rem}
 details.help summary{cursor:pointer;padding:.7rem 0;font:500 .85rem var(--mono);color:var(--muted)}
 details.help[open] summary{color:var(--fg)}
@@ -142,16 +194,17 @@ def page(title, body, root="..", head="", url=None, desc="", mod=None):
 def simulate(deck):
     zs = [nec.impedance(deck, f) for f in SWEEP]
     z0 = nec.impedance(deck, F0)
-    th, ph, g = nec.pattern(deck, F0)
+    th, ph, g, cur = nec.far_field(deck, F0)
     i, j = np.unravel_index(np.argmax(g), g.shape)
     gmax = float(g[i, j])
+    step = int(th[1] - th[0])
     # direzione opposta: (180-theta, phi+180); sopra il suolo resta nello stesso emisfero
-    bi = min(len(th) - 1, int(round((180 - th[i]) / 5))) if not nec.has_ground(deck) else i
+    bi = min(len(th) - 1, int(round((180 - th[i]) / step))) if not nec.has_ground(deck) else i
     bj = (j + len(ph) // 2) % len(ph)
     fb = gmax - float(g[bi, bj])
     k = int(np.argmin([nec.swr(z) for z in zs]))
     return dict(z=z0, swr=nec.swr(z0), gmax=gmax, fb=fb, theta=int(th[i]), phi=int(ph[j]),
-                fres=float(SWEEP[k]), sweep=zs, th=th, ph=ph, g=g, imax=i, jmax=j)
+                fres=float(SWEEP[k]), sweep=zs, th=th, ph=ph, g=g, imax=i, jmax=j, currents=cur)
 
 
 def svg_line(xs, series, ylabel, ymin=None, ymax=None, mark=None):
@@ -216,32 +269,82 @@ IMPORTMAP = ("<script type=importmap>{\"imports\":{\"three\":\"../vendor/three/t
              "\"three/addons/\":\"../vendor/three/\"}}</script>")
 
 
+def viewer_data(deck, r):
+    """Dati per viewer.js. Fili: [x1, y1, z1, x2, y2, z2, raggio, tag, segmenti, riga del GW];
+    cur: [ampiezza normalizzata 0..1, fase in gradi] per ogni segmento, nell'ordine di NEC
+    (i segmenti di un filo sono uguali, il viewer li ricostruisce dai fili)."""
+    p = lambda v: [round(float(c), 5) for c in v]
+    cur = r["currents"]
+    peak = float(np.abs(cur).max()) or 1.0
+    return dict(
+        th=r["th"].tolist(), ph=r["ph"].tolist(), g=np.round(r["g"], 2).tolist(), gmax=round(r["gmax"], 2),
+        theta=r["theta"], phi=r["phi"], ground=nec.has_ground(deck), f0=F0,
+        wires=[[*p(w.p1), *p(w.p2), round(w.r, 6), w.tag, w.segs, w.line] for w in deck.wires],
+        cur=[[round(abs(i) / peak, 3), round(math.degrees(cmath.phase(i)))] for i in cur],
+        feed=p(nec.segment_center(deck, deck.ex[1], deck.ex[2])),
+        nets=[[*p(nec.segment_center(deck, n[1], n[2])), *p(nec.segment_center(deck, n[3], n[4])), n[0]]
+              for n in deck.networks])
+
+
 def viewer(deck, r):
-    s = deck.scale
-    wires = [[round(v * s, 5) for v in w[2:9]] for w in deck.wires]
-    feed = next((k for k, w in enumerate(deck.wires) if w[0] == deck.ex[1]), None)
-    data = dict(th=r["th"].tolist(), ph=r["ph"].tolist(), g=np.round(r["g"], 2).tolist(),
-                gmax=round(r["gmax"], 2), wires=wires, feed=feed)
+    data = viewer_data(deck, r)
     help_body = (
         "<div class=help-body>"
-        "<p>Il raggio della superficie colorata, in ogni direzione, è proporzionale al guadagno: più il "
-        "diagramma si allontana dal centro in una direzione, più energia irradia l'antenna verso quel punto.</p>"
-        f"<p>I colori seguono la legenda in basso a destra: dal blu (−30 dB sotto il massimo) al verde, al "
-        f"giallo, fino al rosso ({r['gmax']:.1f} dBi, il massimo di questo modello).</p>"
-        "<p>I lobi sono le \"bolle\" del diagramma. Il lobo principale è la direzione in cui punta l'antenna; "
-        "i lobi laterali e posteriori, più piccoli, sono energia irradiata altrove — <a href='../guida/#diagramma'>"
-        "vedi il diagramma di irradiazione</a>.</p>"
-        "<p>Il punto verde sui fili è il punto di alimentazione, dove si collega il cavo.</p>"
-        "<p>La griglia orizzontale rappresenta il piano dell'orizzonte, con cerchi ogni 10 dB e raggi ogni 30°: "
-        "aiuta a capire quanto il lobo principale è inclinato verso il suolo o verso il cielo.</p>"
+        "<p><b>Diagramma.</b> Il raggio della superficie colorata, in ogni direzione, è proporzionale al guadagno: "
+        "più si allontana dal centro, più energia irradia l'antenna verso quel punto. I colori seguono la legenda "
+        f"in basso a destra, dal blu (−30 dB sotto il massimo) al rosso ({r['gmax']:.1f} dBi, il massimo di questo "
+        "modello). I lobi sono le \"bolle\": il lobo principale è dove punta l'antenna (la freccia bianca, con il "
+        "guadagno), gli altri sono energia irradiata altrove — <a href='../guida/#diagramma'>vedi il diagramma di "
+        "irradiazione</a>. Passa il mouse (o tocca) sulla superficie per leggere θ, φ, guadagno e dB sotto il massimo.</p>"
+        "<p><b>Scala.</b> <em>dB</em> comprime la dinamica e mostra anche i lobi deboli; <em>Lineare</em> usa la "
+        "potenza: i lobi secondari quasi spariscono e resta il fascio principale. La griglia sul piano dell'orizzonte "
+        "ha raggi ogni 30° e cerchi con i livelli indicati.</p>"
+        "<p><b>Correnti.</b> Ogni segmento dei fili è colorato in base all'intensità della corrente: grigio-blu quasi "
+        "zero, arancio e giallo massima. <em>Fase</em> anima la corrente nel tempo: i tratti sfasati pulsano in "
+        "momenti diversi. Il punto verde è l'alimentazione, dove si collega il cavo; le linee tratteggiate, se "
+        "presenti, sono linee di trasmissione.</p>"
+        "<p><b>Tagli 2D.</b> I due anelli sulla superficie sono i tagli dei grafici qui sotto: il taglio conico "
+        "(azimut, a θ fisso) e quello verticale (elevazione, nel piano del lobo principale).</p>"
+        "<p><b>Antenna e file NEC.</b> Passa sopra un filo per vedere numero di filo, riga e corrente; un clic ti "
+        "porta alla sua riga nel file NEC spiegato più in basso, e viceversa passando o cliccando sulle righe GW o EX "
+        "il filo si illumina nel 3D. La geometria è ingrandita per stare dentro il diagramma.</p>"
+        "<p><b>Comandi.</b> Trascina per ruotare, rotella o pizzico per lo zoom, tasto destro per spostare. "
+        "I pulsanti cambiano punto di vista (di fronte e di lato sono rispetto al lobo principale), fermano la "
+        "rotazione, azzerano la vista o aprono lo schermo intero.</p>"
         "</div>")
-    return ("<div class=viewer id=viewer3d role=img aria-label='Diagramma di irradiazione 3D e geometria dell&apos;antenna'>"
-            "<p class=modes><button data-mode=both aria-pressed=true>Tutto</button>"
-            "<button data-mode=pattern aria-pressed=false>Diagramma</button>"
-            "<button data-mode=geom aria-pressed=false>Antenna</button></p>"
-            f"<div class=legend><span>−30 dB</span><i></i><span>{r['gmax']:.1f} dBi</span></div></div>"
+
+    def btn(label, **attrs):
+        a = "".join(f" {k.replace('_', '-')}={v}" for k, v in attrs.items())
+        return f"<button type=button{a}>{label}</button>"
+
+    tools = (
+        "<div class=vtools role=toolbar aria-label='Controlli della vista 3D'>"
+        "<div class=vgrp role=group aria-label='Cosa mostrare'>"
+        + btn("Tutto", data_mode="both", aria_pressed="true") + btn("Diagramma", data_mode="pattern", aria_pressed="false")
+        + btn("Antenna", data_mode="geom", aria_pressed="false") + "</div>"
+        "<div class=vgrp role=group aria-label='Punto di vista'>"
+        + btn("3D", data_view="iso") + btn("Dall'alto", data_view="top") + btn("Di fronte", data_view="front")
+        + btn("Di lato", data_view="side") + "</div>"
+        "<div class=vgrp role=group aria-label='Scala del diagramma'>"
+        + btn("dB", data_scale="db", aria_pressed="true") + btn("Lineare", data_scale="lin", aria_pressed="false") + "</div>"
+        "<div class=vgrp role=group aria-label='Opzioni'>"
+        + btn("Correnti", data_toggle="cur", aria_pressed="true") + btn("Fase", data_toggle="phase", aria_pressed="false")
+        + btn("Tagli 2D", data_toggle="cuts", aria_pressed="false") + btn("Rotazione", data_toggle="rot", aria_pressed="true")
+        + "</div>"
+        "<div class=vgrp role=group aria-label='Vista'>"
+        + btn("Reset", data_act="reset") + btn("Schermo intero", data_act="fs", aria_pressed="false", hidden="") + "</div>"
+        "</div>")
+    stage = (
+        "<div class=viewer id=viewer3d role=group aria-label='Diagramma di irradiazione 3D e geometria dell&apos;antenna'>"
+        "<div class=vlabels></div><div class=vtip hidden></div>"
+        "<div class=vleg><div id=lg-cur><b>Corrente</b><span>0</span><i></i><span>max</span></div>"
+        f"<div id=lg-pat><b>Guadagno</b><span>−30 dB</span><i></i><span>{r['gmax']:.1f} dBi</span></div></div>"
+        "<p class=vfail hidden>La vista 3D richiede WebGL, che questo browser non offre o ha disattivato. "
+        "I grafici e il file NEC qui sotto funzionano comunque.</p></div>")
+    return (f"<div class=v3d id=v3d>{tools}{stage}</div>"
             "<p class=note>Trascina per ruotare, rotella o pizzico per lo zoom. Il punto verde è l'alimentazione; "
-            "la geometria è ingrandita per stare dentro il diagramma.</p>"
+            "la geometria è ingrandita per stare dentro il diagramma"
+            + (" e il disco è il terreno (l'altezza reale dal suolo non è in scala)" if data["ground"] else "") + ".</p>"
             f"<details class=help><summary>Come leggere la vista 3D</summary>{help_body}</details>"
             f"<script type=application/json id=antenna-data>{json.dumps(data, separators=(',', ':'))}</script>"
             "<script type=module src='../viewer.js'></script>")
@@ -280,12 +383,24 @@ def fmt_z(z):
 
 
 def polarization(deck):
-    """('Verticale'|'Orizzontale', asse) dedotti dalla direzione dominante del filo alimentato."""
-    wire = next((w for w in deck.wires if w[0] == deck.ex[1]), deck.wires[0])
-    dx, dy, dz = abs(wire[5] - wire[2]), abs(wire[6] - wire[3]), abs(wire[7] - wire[4])
-    if dz >= dx and dz >= dy:
-        return "Verticale", "z"
-    return "Orizzontale", "x/y"
+    """'Verticale' o 'Orizzontale', dalla direzione del filo che contiene il segmento alimentato."""
+    w, _ = nec.segment(deck, deck.ex[1], deck.ex[2])
+    dx, dy, dz = (abs(b - a) for a, b in zip(w.p1, w.p2))
+    return "Verticale" if dz >= dx and dz >= dy else "Orizzontale"
+
+
+def check_meta(d, meta):
+    """Errori di meta.json: campi obbligatori, montaggio e foto esistenti."""
+    errs = [f"manca il campo '{k}'" for k in ("title", "author", "type", "description", "license")
+            if not str(meta.get(k, "")).strip()]
+    if meta.get("montaggio") not in (None, *MOUNTS):
+        errs.append(f"montaggio '{meta['montaggio']}' non valido (ammessi: {', '.join(MOUNTS)})")
+    for p in meta.get("photos", []):
+        if not p.get("file") or not p.get("alt"):
+            errs.append("ogni foto vuole 'file' e 'alt'")
+        elif Path(p["file"]).suffix.lower() not in PHOTO_EXT or not (d / p["file"]).is_file():
+            errs.append(f"foto '{p['file']}' mancante o di formato non ammesso")
+    return errs
 
 
 def erp_table(dbd):
@@ -333,7 +448,7 @@ def insights(deck, r, mounted=None):
         fb_note = (f"{fb:.1f} dB, cioè circa <strong>{fb_factor:.1f} volte</strong> più potenza avanti che "
                     "indietro. Vale solo per antenne direttive: orienta il lato \"avanti\" verso il nodo che vuoi raggiungere.")
 
-    pol, axis = polarization(deck)
+    pol = polarization(deck)
     if mounted and mounted != pol:
         pol_note = (f"nel file il filo alimentato è {pol.lower()}, ma l'antenna reale è montata ruotata di 90°: "
                     f"polarizzazione <strong>{mounted.lower()}</strong>. Guadagno, ROS e forma del diagramma "
@@ -379,18 +494,107 @@ def insights(deck, r, mounted=None):
         "</div>")
 
 
+NEC_CAT = {"CM": "com", "CE": "com", "SY": "sy",
+           "GW": "geo", "GS": "geo", "GE": "geo", "GA": "geo", "GM": "geo", "GR": "geo", "GX": "geo",
+           "SP": "geo", "SC": "geo",
+           "EX": "src", "LD": "src", "TL": "src", "NT": "src",
+           "GN": "ctl", "EK": "ctl", "FR": "ctl", "EN": "ctl"}
+NEC_TOKEN = re.compile(r"(?P<id>[A-Za-z_][A-Za-z0-9_]*)|(?P<num>(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)"
+                       r"|(?P<ws>\s+)|(?P<op>.)")
+NEC_RUN_MIN = 12                   # oltre questa soglia una serie di GW consecutivi si comprime
+NEC_RUN_EDGE = 3                   # righe GW lasciate visibili a inizio e fine della serie
+
+
+def nec_hl(raw, card):
+    """Riga NEC in HTML con la sintassi colorata; ogni frammento passa da html.escape."""
+    esc = html.escape
+    body = raw.lstrip()
+    if not body:
+        return ""
+    if card == "'":
+        return f"<span class=t-c>{esc(raw)}</span>"
+    lead, mnem, rest = raw[:len(raw) - len(body)], body[:2], body[2:]
+    head = f"{esc(lead)}<span class='k k-{NEC_CAT.get(card, 'ign')}'>{esc(mnem)}</span>"
+    if card in ("CM", "CE"):
+        return head + f"<span class=t-c>{esc(rest)}</span>"
+    expr, quote, comment = rest.partition("'")
+    out, defining = [], card == "SY"
+    for m in NEC_TOKEN.finditer(expr):
+        tok = m.group()
+        if m.lastgroup == "id":
+            kind = ("fn" if tok in nec.FUNCS else "def" if defining else "var")
+            if kind == "def":
+                defining = False
+        elif m.lastgroup == "num":
+            kind = "n"
+        elif m.lastgroup == "op":
+            kind = "op"
+            defining = defining or (card == "SY" and tok == ",")
+        else:
+            kind = ""
+        out.append(f"<span class=t-{kind}>{esc(tok)}</span>" if kind else esc(tok))
+    if quote:
+        out.append(f"<span class=t-c>{esc(quote + comment)}</span>")
+    return head + "".join(out)
+
+
+def nec_row(l, ex, prev_note):
+    card = l["card"]
+    cat = "blank" if not l["raw"].strip() else "com" if card in ("'", "CM", "CE") else NEC_CAT.get(card, "ign")
+    note = l["note"]
+    if card == "'" or (cat == "com" and note == prev_note):
+        note = ""                  # i commenti si spiegano da soli; CM/CE solo alla prima riga della serie
+    attrs = f"id=L{l['n']} data-line={l['n']}"
+    link = ""
+    if l["tag"] is not None:
+        attrs += f" data-card={card} data-tag={l['tag']} tabindex=0"
+        if card == "EX":
+            attrs += f" data-seg={ex[2]}"
+        link = (f" <a class=to3d href='#v3d' aria-label='Mostra la riga {l['n']} nella vista 3D'>↑ 3D</a>")
+    return (f"<div class='nl c-{cat}' {attrs}>"
+            f"<a class=ln href='#L{l['n']}' aria-label='riga {l['n']}'>{l['n']}</a>"
+            f"<code class=src>{nec_hl(l['raw'], card)}</code>"
+            f"<span class=why>{html.escape(note)}{link}</span></div>"), l["note"]
+
+
 def nec_explained(deck, text):
-    lines = nec.explain_lines(text, deck.scale)
-    rows = "".join(
-        f"<tr><td><code>{html.escape(l['raw']) if l['raw'].strip() else '&nbsp;'}</code></td>"
-        f"<td>{html.escape(l['note'])}</td></tr>"
-        for l in lines)
+    lines = nec.explain_lines(text, deck, F0_IT, SWEEP_IT)
+    out, i, prev = [], 0, None
+    while i < len(lines):
+        j = i
+        while j < len(lines) and lines[j]["card"] == "GW" and lines[j]["tag"] is not None:
+            j += 1
+        if j - i > NEC_RUN_MIN:    # serie di fili: restano visibili i primi e gli ultimi, il resto si espande
+            hidden = lines[i + NEC_RUN_EDGE:j - NEC_RUN_EDGE]
+            run = []
+            for l in lines[i:i + NEC_RUN_EDGE]:
+                row, prev = nec_row(l, deck.ex, prev)
+                out.append(row)
+            for l in hidden:
+                row, prev = nec_row(l, deck.ex, prev)
+                run.append(row)
+            out.append(
+                f"<details class=run><summary>… altri {len(hidden)} fili (tag {hidden[0]['tag']}–{hidden[-1]['tag']}, "
+                f"righe {hidden[0]['n']}–{hidden[-1]['n']}): mostra</summary>{''.join(run)}</details>")
+            for l in lines[j - NEC_RUN_EDGE:j]:
+                row, prev = nec_row(l, deck.ex, prev)
+                out.append(row)
+            i = j
+            continue
+        row, prev = nec_row(lines[i], deck.ex, prev)
+        out.append(row)
+        i += 1
+    key = "".join(f"<span class='k k-{c}'>{label}</span>" for c, label in (
+        ("com", "commenti"), ("sy", "variabili SY"), ("geo", "geometria"),
+        ("src", "alimentazione e carichi"), ("ctl", "controllo"), ("ign", "ignorate")))
     return (
         "<h2>Il file NEC spiegato</h2>"
         "<p class=lede>Il modello NEC-2 di questa antenna, riga per riga. Per il significato generale delle "
         "schede (variabili <code>SY</code>, fili <code>GW</code>, alimentazione <code>EX</code>...) vedi la "
-        "<a href='../guida/#schede-nec'>guida alle schede NEC</a>.</p>"
-        f"<table class=necdump><tr><th>Riga</th><th>Cosa fa</th></tr>{rows}</table>")
+        "<a href='../guida/#schede-nec'>guida alle schede NEC</a>. Passa il mouse su un filo o sull'alimentazione "
+        "per vederli evidenziati nella vista 3D.</p>"
+        f"<p class=nec-key>{key}</p>"
+        f"<div class=nec id=nec role=region aria-label='File NEC con spiegazione riga per riga'>{''.join(out)}</div>")
 
 
 SEARCH = []                        # chunk per la ricerca del sito principale
@@ -455,22 +659,24 @@ def build():
     build_guide()
     rows, errors = [], []
     for d in sorted(p for p in SRC.iterdir() if (p / "antenna.nec").exists()):
-        meta = json.loads((d / "meta.json").read_text())
-        nec_text = (d / "antenna.nec").read_text()
         try:
+            meta = json.loads((d / "meta.json").read_text())
+            if bad := check_meta(d, meta):
+                raise ValueError("meta.json: " + "; ".join(bad))
+            nec_text = (d / "antenna.nec").read_text()
             deck = nec.parse(nec_text)
             r = simulate(deck)
         except Exception as e:  # noqa: BLE001
             errors.append(f"{d.name}: {e}")
             continue
-        pol, _axis = polarization(deck)
+        for w in nec.lint(deck, F0):
+            print(f"AVVISO {d.name}: {w}", file=sys.stderr)
         mounted = meta.get("montaggio")
-        if mounted:
-            pol = mounted
+        pol = mounted or polarization(deck)
         dst = OUT / d.name
         dst.mkdir()
         for f in d.iterdir():
-            if f.suffix.lower() in (".nec", ".jpg", ".jpeg", ".png", ".webp", ".s1p"):
+            if f.suffix.lower() in (*PHOTO_EXT, ".nec", ".s1p"):
                 shutil.copy(f, dst / f.name)
         notes = (markdown.markdown((d / "README.md").read_text(), extensions=["tables", "toc"])
                  if (d / "README.md").exists() else "")
@@ -509,7 +715,9 @@ def build():
                 + (f"<h2>Foto</h2><div class=photos>{photos}</div>{LIGHTBOX}" if photos else "")
                 + (f"<div class=prose>{notes}</div>" if notes else "")
                 + nec_explained(deck, nec_text)
-                + "<h2>File del modello</h2><p><a class=btn href='antenna.nec' download>Scarica antenna.nec</a></p>"
+                + "<h2>File del modello</h2><p class=files><a class=btn href='antenna.nec' download>Scarica antenna.nec</a>"
+                "<button class='btn alt' type=button id=copy-nec>Copia</button>"
+                "<span class=copy-msg id=copy-msg role=status></span></p>"
                 "<p class=note>Si apre con xnec2c, 4nec2 o EZNEC.</p>")
         (dst / "index.html").write_text(page(meta["title"], body, head=IMPORTMAP, url=url,
                                              desc=meta.get("description", ""), mod=lastmod(d)))

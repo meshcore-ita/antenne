@@ -53,7 +53,11 @@ def changed_urls(before, after):
 
 def main():
     a = sys.argv[1] if len(sys.argv) > 1 else ""
-    urls = all_urls() if a == "--all" else changed_urls(a, sys.argv[2] if len(sys.argv) > 2 else "")
+    try:
+        urls = all_urls() if a == "--all" else changed_urls(a, sys.argv[2] if len(sys.argv) > 2 else "")
+    except (OSError, subprocess.CalledProcessError) as e:     # es. sha precedente sparito dopo un force push
+        print(f"IndexNow: git diff fallito ({e}), invio tutte le pagine.")
+        urls = all_urls()
     if not urls:
         print("IndexNow: nessuna pagina cambiata, niente da inviare.")
         return

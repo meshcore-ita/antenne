@@ -1,34 +1,72 @@
-CM Yagi  10 elementi per 869, converted with 4nec2 on 20-ott-26 15:23
+CM Yagi 10 elementi per 869 MHz - modello di Paolo, derivato dal calcolatore di DL6WU
+CM Riflettore 167 mm, dipolo ripiegato 146 x 20 mm, 8 direttori da 146 a 134 mm; boom 740 mm (dal riflettore all'ultimo direttore)
+CM Elementi lungo l'asse x, boom lungo y, fascio verso +y: nel file la polarizzazione e' orizzontale (montata in verticale per LoRa)
+CM Riflettore e direttori: tondino da 4 mm; dipolo ripiegato: filo da 1 mm; conducibilita' 2.49E+07 S/m
+CM Alimentazione: al centro del lato anteriore (inferiore in z) del dipolo ripiegato (filo 2)
+CM Simulato a 869.618 MHz: circa 14.1 dBi - avanti/dietro circa 20 dB - Z circa 51+j7 ohm
+CM Spazio libero; LD 5 modella la conducibilita' dei conduttori
 CE
-GW	1	10	-0.0835	0	0	0.0835	0	0	2.e-3
-GW	2	9	-0.073	0.034	-0.01	0.073	0.034	-0.01	5.e-4
-GW	3	2	0.073	0.034	-0.01	0.073	0.034	0.01	5.e-4
-GW	4	9	0.073	0.034	0.01	-0.073	0.034	0.01	5.e-4
-GW	5	2	-0.073	0.034	0.01	-0.073	0.034	-0.01	5.e-4
-GW	6	9	-0.073	0.095	0	0.073	0.095	0	2.e-3
-GW	7	9	-0.072	0.157	0	0.072	0.157	0	2.e-3
-GW	8	9	-0.071	0.231	0	0.071	0.231	0	2.e-3
-GW	9	9	-0.07	0.317	0	0.07	0.317	0	2.e-3
-GW	10	9	-0.069	0.414	0	0.069	0.414	0	2.e-3
-GW	11	8	-0.0685	0.517	0	0.0685	0.517	0	2.e-3
-GW	12	8	-0.0675	0.626	0	0.0675	0.626	0	2.e-3
-GW	13	8	-0.067	0.74	0	0.067	0.74	0	2.e-3
-GE	0
-LD	5	1	0	0	24900000
-LD	5	2	0	0	24900000
-LD	5	3	0	0	24900000
-LD	5	4	0	0	24900000
-LD	5	5	0	0	24900000
-LD	5	6	0	0	24900000
-LD	5	7	0	0	24900000
-LD	5	8	0	0	24900000
-LD	5	9	0	0	24900000
-LD	5	10	0	0	24900000
-LD	5	11	0	0	24900000
-LD	5	12	0	0	24900000
-LD	5	13	0	0	24900000
-GN	-1
+
+' --- Diametri (m) ---
+SY dia=4/1000	' diametro di riflettore e direttori
+SY diaf=1/1000	' diametro del filo del dipolo ripiegato
+' --- Dipolo ripiegato (m) ---
+SY lf=146/1000	' lunghezza dei lati lunghi (lungo x)
+SY hf=20/1000	' distanza tra i due lati (lungo z)
+' --- Lunghezze degli elementi (m) ---
+SY lr=167/1000	' riflettore
+SY ld1=146/1000	' direttore 1
+SY ld2=144/1000	' direttore 2
+SY ld3=142/1000	' direttore 3
+SY ld4=140/1000	' direttore 4
+SY ld5=138/1000	' direttore 5
+SY ld6=137/1000	' direttore 6
+SY ld7=135/1000	' direttore 7
+SY ld8=134/1000	' direttore 8
+
+' --- Posizioni lungo il boom (m, dal riflettore) ---
+SY yf=34/1000	' dipolo ripiegato
+SY yd1=95/1000	' direttore 1
+SY yd2=157/1000	' direttore 2
+SY yd3=231/1000	' direttore 3
+SY yd4=317/1000	' direttore 4
+SY yd5=414/1000	' direttore 5
+SY yd6=517/1000	' direttore 6
+SY yd7=626/1000	' direttore 7
+SY yd8=740/1000	' direttore 8
+
+' --- Geometria ---
+' Riflettore
+GW 1 10 -lr/2 0 0 lr/2 0 0 dia/2
+' Dipolo ripiegato (rettangolo chiuso nel piano xz): lato inferiore (alimentato), lato corto destro, lato superiore, lato corto sinistro
+GW 2 9 -lf/2 yf -hf/2 lf/2 yf -hf/2 diaf/2
+GW 3 2 lf/2 yf -hf/2 lf/2 yf hf/2 diaf/2
+GW 4 9 lf/2 yf hf/2 -lf/2 yf hf/2 diaf/2
+GW 5 2 -lf/2 yf hf/2 -lf/2 yf -hf/2 diaf/2
+' Direttori
+GW 6 9 -ld1/2 yd1 0 ld1/2 yd1 0 dia/2
+GW 7 9 -ld2/2 yd2 0 ld2/2 yd2 0 dia/2
+GW 8 9 -ld3/2 yd3 0 ld3/2 yd3 0 dia/2
+GW 9 9 -ld4/2 yd4 0 ld4/2 yd4 0 dia/2
+GW 10 9 -ld5/2 yd5 0 ld5/2 yd5 0 dia/2
+GW 11 8 -ld6/2 yd6 0 ld6/2 yd6 0 dia/2
+GW 12 8 -ld7/2 yd7 0 ld7/2 yd7 0 dia/2
+GW 13 8 -ld8/2 yd8 0 ld8/2 yd8 0 dia/2
+GE 0
+
+' --- Conducibilita' dei conduttori: 2.49E+07 S/m su tutti i fili (tag 0) ---
+LD 5 0 0 0 2.49E+07
+
+' --- Spazio libero ---
+GN -1
 EK
-EX	0	2	5	0	1	0	0	0
-FR	0	0	0	0	869	0
+
+' --- Alimentazione: 1 V al centro del lato inferiore del dipolo ripiegato (filo 2 - segmento 5 di 9) ---
+EX 0 2 5 0 1 0 0 0
+
+' --- Frequenza di progetto (preset italiano 869.618 MHz) ---
+FR 0 1 0 0 869.618 0
+
+' --- Diagramma di irradiazione (ignorato dalla galleria: utile in 4nec2) ---
+RP 0 37 73 1000 0 0 5 5
 EN

@@ -443,13 +443,16 @@ virgole). Il parser di questa galleria (`tools/nec.py`) supporta queste:
 |---|---|---|
 | `CM` | Commento (una riga di descrizione, può ripetersi) | testo libero |
 | `CE` | Fine dei commenti, inizia la geometria | (nessuno) |
-| `SY` | Definisce una variabile (come in 4nec2), utilizzabile nelle righe dopo | `nome=espressione` |
+| `SY` | Definisce una variabile (come in 4nec2), utilizzabile nelle righe dopo | `nome=espressione`, con `+ - * / ^` e funzioni come `sqrt`, `sin`, `cos` |
 | `GW` | Un filo (wire): tag, segmenti, coordinate estremi, raggio | tag, n° segmenti, x1 y1 z1, x2 y2 z2, raggio (tutto in metri) |
+| `GS` | Scala tutti i fili definiti prima (es. `0.001` per scrivere in mm) | ..., fattore di scala |
 | `GE` | Fine geometria; il numero indica se c'è un piano di terra | 0 = nessun piano immagine, 1 = con piano immagine |
 | `EK` | Attiva il "thin-wire kernel esteso", più accurato per fili spessi rispetto alla lunghezza dei segmenti | (nessun campo, o `-1` per disattivarlo) |
 | `GN` | Tipo di terreno sotto l'antenna | tipo (−1 spazio libero, 0 terreno reale, 1 terreno perfetto), n° radiali, poi costante dielettrica e conducibilità |
 | `EX` | Sorgente di eccitazione (dove si alimenta) | tipo (0 = generatore di tensione), tag del filo, numero di segmento |
 | `LD` | Carico/perdita su uno o più segmenti (es. conducibilità reale di un metallo) | tipo, tag (0 = tutti), segmento iniziale, segmento finale, valore |
+| `TL` | Linea di trasmissione ideale fra due segmenti (es. una linea di adattamento) | tag e segmento dei due capi, impedenza caratteristica, lunghezza (0 = distanza fra i segmenti) |
+| `NT` | Rete a due porte generica fra due segmenti | tag e segmento dei due capi, ammettenze |
 | `FR` | Frequenza di lavoro | ..., frequenza in MHz |
 | `RP` | Richiesta di diagramma di irradiazione | **ignorata da questa galleria**: il diagramma lo ricalcola sempre lei stessa, per uniformità tra tutte le schede |
 | `EN` | Fine del file | (nessun campo; tutto dopo viene ignorato) |
@@ -464,16 +467,18 @@ modello NEC-2 a filo sottile:
 
 1. **almeno 10 segmenti per ogni mezza lunghezza d'onda** di filo (più
    segmenti = più precisione, ma anche più tempo di calcolo);
-2. **lunghezza di ciascun segmento > 4 volte il raggio del filo**, perché
-   sotto questa soglia l'approssimazione "filo sottile" di NEC-2 perde
-   accuratezza (per questo i modelli di questa galleria usano anche `EK`,
-   che allarga un po' il margine per fili relativamente spessi).
+2. **lunghezza di ciascun segmento non troppo corta rispetto al raggio**:
+   il manuale di NEC-2 indica almeno 8 volte il raggio con il kernel normale
+   e almeno 2 volte con `EK`, il "thin-wire kernel esteso" (per questo i
+   modelli di questa galleria usano tutti `EK`).
 
-Esempio verificato sul modello della Yagi a 3 elementi di riferimento:
-l'elemento riflettore è lungo 172,4 mm su 21 segmenti, cioè 8,2 mm a
-segmento; il raggio del filo è 2 mm, quindi il rapporto è `8,2 / 2 = 4,1`:
-appena sopra la soglia minima di 4. Il dipolo di riferimento (160,6 mm su 21
-segmenti, raggio 1 mm) sta molto più comodo, con rapporto 7,65.
+Esempio sul modello della Yagi a 3 elementi di riferimento: l'elemento
+alimentato è lungo 145 mm su 21 segmenti, cioè 6,9 mm a segmento; il raggio
+del tubo è 2 mm, quindi il rapporto è `6,9 / 2 = 3,5`: sotto 8, ma sopra 2,
+quindi va bene solo grazie a `EK`. Il dipolo di riferimento (160,6 mm su 21
+segmenti, raggio 1 mm) sta molto più comodo, con rapporto 7,65. Il build
+della galleria controlla entrambe le regole e stampa un avviso se un filo
+non le rispetta.
 
 ## Dal modello alla realtà {#dal-modello-alla-realta}
 

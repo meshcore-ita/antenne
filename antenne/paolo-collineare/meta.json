@@ -2,8 +2,8 @@
   "title": "Antenna verticale collineare 2 elementi per 869 MHz",
   "author": "Paolo",
   "type": "Verticale collineare",
-  "status": "Progetto di riferimento",
-  "description": "Le antenne collineari sono sempre complesse da costruire e da tarare",
+  "status": "Prototipo",
+  "description": "Collineare verticale di 421 mm: elemento inferiore da 161 mm, bobina di sfasamento di 7,65 spire in filo da 2 mm ed elemento superiore da 183,5 mm. Costruita e misurata: il ROS reale è circa 1,3, più basso di quello del modello.",
   "photos": [],
   "license": "CC-BY-SA-4.0"
 }

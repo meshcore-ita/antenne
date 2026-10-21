@@ -23,10 +23,14 @@ Per ogni modello, in spazio libero o sopra il terreno definito dal file:
 - guadagno massimo e rapporto avanti/dietro
 - due tagli del diagramma di irradiazione attraverso la direzione di massimo
 
-Ogni scheda ha anche una vista 3D interattiva (diagramma di irradiazione e
-geometria) fatta con [three.js](https://threejs.org/), incluso nel repo in
-`tools/vendor/three/` insieme ai font: la galleria non carica nulla da
-servizi esterni. I file `.nec` si aprono anche con xnec2c, 4nec2 o EZNEC.
+Ogni scheda ha anche una vista 3D interattiva fatta con
+[three.js](https://threejs.org/): diagramma di irradiazione (in dB o lineare,
+con i due tagli dei grafici), geometria colorata secondo la corrente su ogni
+segmento, punto di alimentazione e lobo principale. Passando il mouse su un
+filo si vede la riga `GW` che lo definisce nel file `.nec` spiegato riga per
+riga, e viceversa. three.js è incluso nel repo in `tools/vendor/three/`
+insieme ai font: la galleria non carica nulla da servizi esterni. I file
+`.nec` si aprono anche con xnec2c, 4nec2 o EZNEC.
 
 ## Generare la galleria in locale
 

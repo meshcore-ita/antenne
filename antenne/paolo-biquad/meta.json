@@ -2,8 +2,8 @@
   "title": "Antenna Biquad con riflettore 869 MHz",
   "author": "Paolo",
   "type": "Biquad",
-  "status": "Progetto di riferimento",
-  "description": "La biquad è relativamente facile da costruire e fornisce un buon guadagno",
+  "status": "Prototipo",
+  "description": "Due quadrati a 45° (diagonale 119 mm) in filo da 2 mm, davanti a una griglia riflettente a 35 mm. Costruita e tarata con il nanoVNA: ROS praticamente perfetto a 869 MHz.",
   "photos": [
     {
       "file": "fronte.jpg",

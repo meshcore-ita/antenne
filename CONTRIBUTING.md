@@ -2,8 +2,10 @@
 
 1. Crea una cartella `antenne/<autore>-<tipo>`, in minuscolo con trattini.
 2. Metti il modello in `antenna.nec`. Misure in metri; puoi usare variabili
-   `SY` come in 4nec2. Schede supportate: `CM CE SY GW GS GE EK GN EX LD FR`
-   (`RP`, `PT`, `EN` vengono ignorate: il diagramma lo calcola la galleria).
+   `SY` come in 4nec2, con `+ - * / ^` e `sin cos tan atan sqrt log log10
+   exp abs pi`. Schede supportate: `CM CE SY GW GS GE EK GN EX LD TL NT FR`
+   (`RP`, `PT`, `PL`, `XQ`, `NE`, `NH`, `EN` vengono ignorate: il diagramma lo
+   calcola la galleria). Una sola sorgente `EX` in tensione.
 
    La galleria mostra il file riga per riga, quindi i commenti contano. Per
    restare coerente con gli altri modelli:
@@ -16,7 +18,9 @@
    - ordine `GE 0`, `LD`, `GN -1`, `EK`, `EX`, `FR`, `RP`, `EN`; campi
      separati da spazi; fili numerati 1..N; `EX` sul segmento centrale;
    - nei `.nec` solo caratteri ASCII (`e'`, `ohm`, `gradi`): 4nec2 non
-     legge bene gli accenti.
+     legge bene gli accenti; righe terminate con LF (non CRLF);
+   - se esporti da 4nec2 o EZNEC, riscrivi il file in questo stile prima
+     della pull request: l'export ha campi separati da TAB e nessun commento.
 
    Un esempio completo è `antenne/fabrizio-yagi-lfa-3el/antenna.nec`.
 
@@ -42,6 +46,10 @@
 4. Facoltativo: `README.md` con note di costruzione, foto, e una misura
    `.s1p` fatta con un VNA.
 5. Controlla in locale con `python tools/build.py` e apri una pull request.
+   Il build si ferma se `meta.json` non ha i campi obbligatori, se una foto
+   manca o se `EX`, `LD` o `TL` puntano a fili o segmenti inesistenti; stampa
+   un `AVVISO` (senza fermarsi) se i segmenti sono più lunghi di λ/20 o più
+   corti di 2 volte il raggio con `EK` (8 senza).
 
 Pubblicando confermi che il modello e le foto sono tuoi, o che hai il
 permesso dell'autore, e che li rilasci con la licenza indicata.
